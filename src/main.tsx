@@ -18,7 +18,7 @@ if (saved) {
   hydrate(saved);
   if (saved.characters.length > 0) ui.setResumePending(true);
 }
-if (seed) seedDemo(seed === "play");
+if (seed) seedDemo(seed === "play", params.get("scene") !== "0");
 const motion = seed ? params.get("motion") : null;
 if (motion) setTimeout(() => void callTool("apply_motion", { character: "cat", motion }), 400);
 startAutosave();

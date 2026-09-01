@@ -196,6 +196,7 @@ export function removeCharacter(id: string): boolean {
 }
 
 export function resetAll(): void {
+  ui.clearSkipped();
   ui.clearUndo();
   ui.setDoneSheet(false);
   replaceState(initialState());

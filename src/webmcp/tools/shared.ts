@@ -4,6 +4,7 @@ import { findCharacter, isColored } from "../../state/selectors";
 import { getState } from "../../state/store";
 import type { Character } from "../../state/types";
 import { ui } from "../../state/ui";
+import { describeActivity } from "../activity";
 import { summarize } from "../describe";
 import { fail, type ToolError } from "../results";
 
@@ -22,14 +23,26 @@ export function defineTool(def: ToolDef): ToolDef {
   return {
     ...def,
     execute(input: unknown) {
-      ui.noteToolCall(def.name);
+      const before = getState();
+      let result: unknown;
       try {
-        return def.execute(input);
+        result = def.execute(input);
       } catch {
-        return fail("internal", `${def.name} failed unexpectedly.`, {
+        result = fail("internal", `${def.name} failed unexpectedly.`, {
           hint: "Call get_studio_state and retry.",
         });
       }
+      const note = describeActivity(def.name, input, result, before, getState());
+      ui.noteActivity({
+        tool: def.name,
+        kid: note.kid,
+        tag: note.tag,
+        ok: (result as { ok?: boolean }).ok === true,
+        read: def.readOnly === true,
+        at: Date.now(),
+      });
+      if (note.flash.length > 0) ui.flash(note.flash);
+      return result;
     },
   };
 }

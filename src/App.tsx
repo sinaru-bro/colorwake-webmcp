@@ -2,6 +2,7 @@ import "./app/app.css";
 import { DevPanel } from "./app/DevPanel";
 import { ResumeDialog, Toast } from "./app/Dialogs";
 import { Header } from "./app/Header";
+import { Hud } from "./app/Hud";
 import { Sidebar } from "./app/Sidebar";
 import { PlayArea } from "./play/PlayArea";
 import { ScenePanel, SceneRail } from "./play/ScenePanel";
@@ -20,7 +21,10 @@ export default function App() {
     <div className="shell">
       <Header />
       <div className="body">
-        {coloring ? <Canvas /> : <PlayArea />}
+        <div className="stage">
+          {coloring ? <Canvas /> : <PlayArea />}
+          <Hud />
+        </div>
         <Sidebar
           label={coloring ? "Tools" : "Scene"}
           rail={coloring ? <PaletteRail /> : <SceneRail />}

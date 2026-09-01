@@ -74,6 +74,7 @@ function Tray() {
 
 function AgentBadge() {
   const agent = useUi((s) => s.agent);
+  const activity = useUi((s) => s.activity);
   const storageError = useUi((s) => s.storageError);
   const [open, setOpen] = useState(false);
   const status = storageError
@@ -100,9 +101,20 @@ function AgentBadge() {
               <br />
             </span>
           ))}
-          {agent.lastCall && (
-            <span>
-              last call: <code>{agent.lastCall}</code>
+          {activity.length > 0 && (
+            <span className="badge__log">
+              <strong>Recent</strong>
+              <br />
+              {activity
+                .slice(-6)
+                .reverse()
+                .map((a) => (
+                  <span key={a.id}>
+                    <code>{a.tag}</code>
+                    {a.kid ? ` — ${a.kid}` : ""}
+                    <br />
+                  </span>
+                ))}
             </span>
           )}
         </span>

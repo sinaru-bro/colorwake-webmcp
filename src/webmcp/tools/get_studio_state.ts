@@ -8,7 +8,7 @@ export const getStudioState = defineTool({
   name: "get_studio_state",
   title: "Look at the studio",
   description:
-    "Read what is on screen right now: the mode (coloring or playing), every picture the child has colored (which regions have which colors, how done it is, where it stands, whether it is moving), the current tool and color, and the scene (place, time, weather, effects). Call this first before directing the play screen so you react to the child's real colors. Read-only. Note: colorwake never paints for the child — there is no fill or draw tool; the child does all coloring.",
+    "Read what is on screen right now: the mode (coloring or playing), every picture the child has colored (which regions have which colors, how done it is, where it stands, whether it is moving), the current tool and color, and the scene (place, time, weather, effects — null means not chosen yet). Call this first before directing the play screen; if nextQuestion is set, ask the child that next. Read-only. colorwake never paints for the child — there is no fill or draw tool.",
   schema: GetStudioStateInput,
   readOnly: true,
   execute(input) {

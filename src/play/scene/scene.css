@@ -6,6 +6,19 @@
   pointer-events: none;
 }
 
+@keyframes layer-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.layer-in {
+  animation: layer-in 0.4s ease-out both;
+}
+
 @keyframes drop-fall {
   from {
     transform: translateY(0);

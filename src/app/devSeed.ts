@@ -22,7 +22,7 @@ const DEMO: Array<{ sketch: string; fills: Record<string, string> }> = [
   },
 ];
 
-export function seedDemo(play = true): void {
+export function seedDemo(play = true, withScene = true): void {
   resetAll();
   for (const item of DEMO) {
     if (!pickSketch(item.sketch).ok) continue;
@@ -30,6 +30,6 @@ export function seedDemo(play = true): void {
   }
   if (play) {
     enterPlay();
-    arrangeScene({ place: "sea", time: "day", weather: "rain" });
+    if (withScene) arrangeScene({ place: "sea", time: "day", weather: "rain" });
   }
 }

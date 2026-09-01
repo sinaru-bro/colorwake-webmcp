@@ -1,5 +1,14 @@
+import { PLACES, TIMES, WEATHERS } from "../content/scenes";
 import { sketchById } from "../content/sketches/catalog";
-import { ANCHORS, type Anchor, type Character, type Position, type StudioState } from "./types";
+import {
+  ANCHORS,
+  type Anchor,
+  type Character,
+  type Position,
+  type Scene,
+  type SceneAxis,
+  type StudioState,
+} from "./types";
 
 export function activeCharacter(s: StudioState): Character | null {
   return s.characters.find((c) => c.id === s.activeCharacterId) ?? null;
@@ -76,4 +85,26 @@ export function nearestAnchor(p: Position): Anchor {
 
 export function trayCount(s: StudioState): number {
   return s.characters.length;
+}
+
+export interface SceneQuestion {
+  axis: SceneAxis;
+  ask: string;
+  options: string[];
+}
+
+const QUESTIONS: Array<{ axis: SceneAxis; ask: string; options: () => string[] }> = [
+  { axis: "place", ask: "Where are we?", options: () => PLACES.map((p) => p.id) },
+  { axis: "time", ask: "Is it day or night?", options: () => TIMES.map((t) => t.id) },
+  { axis: "weather", ask: "What's the weather?", options: () => WEATHERS.map((w) => w.id) },
+];
+
+/** The first scene axis still unset (and not skipped), shared by the on-screen guide and tool results. */
+export function nextQuestion(scene: Scene, skipped: readonly SceneAxis[] = []): SceneQuestion | null {
+  for (const q of QUESTIONS) {
+    if (scene[q.axis] === null && !skipped.includes(q.axis)) {
+      return { axis: q.axis, ask: q.ask, options: q.options() };
+    }
+  }
+  return null;
 }

@@ -1,6 +1,8 @@
 import { colorAnother, enterPlay } from "../../state/actions";
+import { nextQuestion } from "../../state/selectors";
 import { getState } from "../../state/store";
 import { LIMITS } from "../../state/types";
+import { uiStore } from "../../state/ui";
 import { summarize } from "../describe";
 import { fail, ok } from "../results";
 import { SetModeInput } from "../schemas";
@@ -30,6 +32,7 @@ export const setMode = defineTool({
         dropped: res.dropped,
         tray: { count: s.characters.length, capacity: LIMITS.maxCharacters },
         characters: s.characters.map(summarize),
+        nextQuestion: nextQuestion(s.scene, uiStore.getState().skipped),
       });
     }
     const res = colorAnother();

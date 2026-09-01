@@ -31,16 +31,23 @@ export function parseSaved(raw: string | null): StudioState | null {
     typeof data.activeCharacterId === "string" && characters.some((c) => c.id === data.activeCharacterId)
       ? data.activeCharacterId
       : null;
-  const scene = isRecord(data.scene) ? (data.scene as unknown as StudioState["scene"]) : null;
+  const savedScene = isRecord(data.scene) ? data.scene : null;
   const tool = isRecord(data.tool) ? (data.tool as unknown as StudioState["tool"]) : null;
-  if (!scene || !tool) return null;
+  if (!savedScene || !tool) return null;
+  const axis = <T extends string>(v: unknown): T | null => (typeof v === "string" ? (v as T) : null);
+  const scene: StudioState["scene"] = {
+    place: axis(savedScene.place),
+    time: axis(savedScene.time),
+    weather: axis(savedScene.weather),
+    effects: Array.isArray(savedScene.effects) ? (savedScene.effects as StudioState["scene"]["effects"]) : [],
+  };
   return {
     version: 1,
     mode,
     characters,
     activeCharacterId,
     tool,
-    scene: { ...scene, effects: Array.isArray(scene.effects) ? scene.effects : [] },
+    scene,
     updatedAt: typeof data.updatedAt === "number" ? data.updatedAt : Date.now(),
   };
 }

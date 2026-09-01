@@ -1,7 +1,8 @@
 import { PLACES, WEATHERS } from "../../content/scenes";
 import { arrangeScene as arrange, type Placement } from "../../state/actions";
-import { nearestAnchor } from "../../state/selectors";
+import { nearestAnchor, nextQuestion } from "../../state/selectors";
 import { getState } from "../../state/store";
+import { uiStore } from "../../state/ui";
 import { ANCHORS, type Anchor, type PlaceId, type WeatherId } from "../../state/types";
 import { summarize } from "../describe";
 import { fail, ok } from "../results";
@@ -12,7 +13,7 @@ export const arrangeScene = defineTool({
   name: "arrange_scene",
   title: "Set the scene",
   description:
-    'Compose the play screen: choose the place (home, sea, sky …), day or night, the weather (clear, rain, snow, cloudy …) and where colored pictures stand (left, center, right, sky or exact x/y). Use when a grown-up asks the child "where are we? day or night? what\'s the weather?" or the child wants characters to go somewhere or meet. Anything goes — a fish on land is fine. Only what you pass changes. Does not change colors or motions.',
+    'Compose the play screen: choose the place (home, sea, sky …), day or night, the weather (clear, rain, snow, cloudy …) and where colored pictures stand (left, center, right, sky or exact x/y). Use when the child answers "where are we? day or night? what\'s the weather?" or wants characters to go somewhere or meet. Anything goes — a fish on land is fine. Only what you pass changes; nextQuestion in the result is what to ask next. Does not change colors or motions.',
   schema: ArrangeSceneInput,
   execute(input) {
     const parsed = parseInput(ArrangeSceneInput, input);
@@ -61,6 +62,7 @@ export const arrangeScene = defineTool({
     }));
     return ok({
       scene: { place: scene.place, time: scene.time, weather: scene.weather },
+      nextQuestion: nextQuestion(scene, uiStore.getState().skipped),
       characters,
       clamped: Object.keys(clamped).length ? clamped : null,
       switchedTo: switched.switchedTo,

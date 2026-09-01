@@ -5,10 +5,12 @@ import {
   dominantColors,
   isColored,
   nearestAnchor,
+  nextQuestion,
   progress,
   regionColors,
 } from "../state/selectors";
 import { LIMITS, type Character, type StudioState } from "../state/types";
+import { uiStore } from "../state/ui";
 import { getEngine } from "./engineBridge";
 
 export const STATE_SIZE_LIMIT = 1500;
@@ -59,6 +61,7 @@ export function describeState(s: StudioState): Record<string, unknown> {
     tray: { count: s.characters.length, capacity: LIMITS.maxCharacters },
     tool: s.tool,
     scene: s.scene,
+    nextQuestion: nextQuestion(s.scene, uiStore.getState().skipped),
   };
   if (characters.length === 0) {
     return { ...base, hint: "Nothing colored yet. Offer a sketch with list_sketches / pick_sketch." };

@@ -1,8 +1,18 @@
 import { useStore } from "zustand";
 import { createStore } from "zustand/vanilla";
-import type { Paint, Position } from "./types";
+import type { Paint, Position, SceneAxis } from "./types";
 
 export type AgentSupport = "native" | "none";
+
+export interface Activity {
+  id: number;
+  tool: string;
+  kid: string | null;
+  tag: string;
+  ok: boolean;
+  read: boolean;
+  at: number;
+}
 
 export interface UiState {
   undo: Record<string, Paint[]>;
@@ -10,13 +20,19 @@ export interface UiState {
   sidebarOpen: boolean;
   doneSheetOpen: boolean;
   resumePending: boolean;
-  agent: { support: AgentSupport; lastCall: string | null };
+  agent: { support: AgentSupport };
+  activity: Activity[];
+  skipped: SceneAxis[];
+  flash: { keys: string[]; n: number } | null;
   storageError: boolean;
   toast: string | null;
   helperPulse: number;
 }
 
 const UNDO_DEPTH = 20;
+const ACTIVITY_DEPTH = 20;
+const FLASH_MS = 900;
+let activitySeq = 0;
 
 export const uiStore = createStore<UiState>(() => ({
   undo: {},
@@ -24,7 +40,10 @@ export const uiStore = createStore<UiState>(() => ({
   sidebarOpen: typeof window === "undefined" || window.innerWidth >= 1000,
   doneSheetOpen: false,
   resumePending: false,
-  agent: { support: "none", lastCall: null },
+  agent: { support: "none" },
+  activity: [],
+  skipped: [],
+  flash: null,
   storageError: false,
   toast: null,
   helperPulse: 0,
@@ -65,10 +84,26 @@ export const ui = {
     uiStore.setState({ resumePending: pending });
   },
   setAgent(support: AgentSupport): void {
-    uiStore.setState((s) => ({ agent: { ...s.agent, support } }));
+    uiStore.setState({ agent: { support } });
   },
-  noteToolCall(name: string): void {
-    uiStore.setState((s) => ({ agent: { ...s.agent, lastCall: name } }));
+  noteActivity(entry: Omit<Activity, "id">): void {
+    activitySeq += 1;
+    uiStore.setState((s) => ({
+      activity: [...s.activity, { ...entry, id: activitySeq }].slice(-ACTIVITY_DEPTH),
+    }));
+  },
+  skipQuestion(axis: SceneAxis): void {
+    uiStore.setState((s) => ({ skipped: s.skipped.includes(axis) ? s.skipped : [...s.skipped, axis] }));
+  },
+  clearSkipped(): void {
+    uiStore.setState({ skipped: [] });
+  },
+  flash(keys: string[]): void {
+    const n = (uiStore.getState().flash?.n ?? 0) + 1;
+    uiStore.setState({ flash: { keys, n } });
+    setTimeout(() => {
+      if (uiStore.getState().flash?.n === n) uiStore.setState({ flash: null });
+    }, FLASH_MS);
   },
   setStorageError(error: boolean): void {
     uiStore.setState({ storageError: error });

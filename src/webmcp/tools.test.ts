@@ -207,7 +207,8 @@ describe("arrange_scene", () => {
     });
     expect(res).toMatchObject({
       ok: true,
-      scene: { place: "sea", time: "day", weather: "clear" },
+      scene: { place: "sea", time: null, weather: null },
+      nextQuestion: { axis: "time", ask: "Is it day or night?" },
       switchedTo: "play",
     });
     expect(res.clamped).toEqual({ "placements[0].at": { x: 1, y: 0.9 } });

@@ -1,16 +1,17 @@
-import type { Scene } from "../../state/types";
+import type { PlaceId, Scene, TimeId } from "../../state/types";
 import "./scene.css";
 
 export const SCENE_W = 1600;
 export const SCENE_H = 1200;
 export const HORIZON_Y = 936;
 
-const SKY: Record<Scene["time"], { top: string; bottom: string }> = {
+const SKY: Record<TimeId, { top: string; bottom: string }> = {
   day: { top: "#BFE6FF", bottom: "#EAF7FF" },
   night: { top: "#0F1C3F", bottom: "#2B3A6B" },
 };
+const NEUTRAL_SKY = { top: "#EAF2F8", bottom: "#FDFBF5" };
 
-const GROUND: Record<Scene["place"], string> = {
+const GROUND: Record<PlaceId, string> = {
   blank: "#F1E7D2",
   home: "#9CCB6B",
   sea: "#E8D8A8",
@@ -30,7 +31,7 @@ function Cloud({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
   );
 }
 
-function Place({ place, time }: { place: Scene["place"]; time: Scene["time"] }) {
+function Place({ place, time }: { place: PlaceId | null; time: TimeId | null }) {
   const dim = time === "night" ? 0.7 : 1;
   const style = { filter: `brightness(${dim})` };
   switch (place) {
@@ -155,13 +156,20 @@ function Place({ place, time }: { place: Scene["place"]; time: Scene["time"] }) 
           <ellipse cx="800" cy="1080" rx="1100" ry="260" fill={GROUND.mountain} />
         </g>
       );
-    default:
+    case "blank":
       return <ellipse cx="800" cy="1100" rx="1200" ry="280" fill={GROUND.blank} />;
+    default:
+      return (
+        <g>
+          <rect x="0" y={HORIZON_Y} width={SCENE_W} height={SCENE_H - HORIZON_Y} fill="#F3EBDA" />
+          <line x1="0" y1={HORIZON_Y} x2={SCENE_W} y2={HORIZON_Y} stroke="#D9C9A8" strokeWidth="4" />
+        </g>
+      );
   }
 }
 
 export function BackLayers({ scene }: { scene: Scene }) {
-  const sky = SKY[scene.time];
+  const sky = scene.time ? SKY[scene.time] : NEUTRAL_SKY;
   const stars = scene.time === "night" ? [120, 340, 560, 780, 1000, 1220, 1440, 260, 900, 1300] : [];
   return (
     <svg
@@ -176,30 +184,33 @@ export function BackLayers({ scene }: { scene: Scene }) {
           <stop offset="1" stopColor={sky.bottom} />
         </linearGradient>
       </defs>
-      <rect width={SCENE_W} height={SCENE_H} fill="url(#scene-sky)" />
-      {scene.time === "day" ? (
-        <circle cx="1380" cy="180" r="90" fill="#FFD60A" />
-      ) : (
-        <>
-          <circle cx="1380" cy="180" r="80" fill="#FFF3B0" />
-          {stars.map((x, i) => (
-            <circle
-              key={i}
-              cx={x}
-              cy={80 + ((i * 137) % 400)}
-              r={i % 3 === 0 ? 5 : 3}
-              fill="#FFFFFF"
-              opacity="0.9"
-            />
-          ))}
-        </>
-      )}
-      <Place place={scene.place} time={scene.time} />
+      <g key={scene.time ?? "unset"} className="layer-in">
+        <rect width={SCENE_W} height={SCENE_H} fill="url(#scene-sky)" />
+        {scene.time === "day" && <circle cx="1380" cy="180" r="90" fill="#FFD60A" />}
+        {scene.time === "night" && (
+          <>
+            <circle cx="1380" cy="180" r="80" fill="#FFF3B0" />
+            {stars.map((x, i) => (
+              <circle
+                key={i}
+                cx={x}
+                cy={80 + ((i * 137) % 400)}
+                r={i % 3 === 0 ? 5 : 3}
+                fill="#FFFFFF"
+                opacity="0.9"
+              />
+            ))}
+          </>
+        )}
+      </g>
+      <g key={scene.place ?? "unset"} className="layer-in">
+        <Place place={scene.place} time={scene.time} />
+      </g>
     </svg>
   );
 }
 
-const PARTICLES: Record<Exclude<Scene["weather"], "clear" | "wind" | "thunder">, number> = {
+const PARTICLES: Record<"rain" | "snow" | "cloudy", number> = {
   rain: 60,
   snow: 40,
   cloudy: 5,
@@ -207,10 +218,12 @@ const PARTICLES: Record<Exclude<Scene["weather"], "clear" | "wind" | "thunder">,
 
 export function WeatherLayer({ scene }: { scene: Scene }) {
   const w = scene.weather;
+  if (w === null) return null;
   if (w === "clear") {
     return (
       <svg
-        className="scene-layer"
+        key={w}
+        className="scene-layer layer-in"
         viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
@@ -235,7 +248,8 @@ export function WeatherLayer({ scene }: { scene: Scene }) {
   if (w === "cloudy") {
     return (
       <svg
-        className="scene-layer"
+        key={w}
+        className="scene-layer layer-in"
         viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
@@ -256,7 +270,8 @@ export function WeatherLayer({ scene }: { scene: Scene }) {
   if (w === "thunder") {
     return (
       <svg
-        className="scene-layer"
+        key={w}
+        className="scene-layer layer-in"
         viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
@@ -277,7 +292,8 @@ export function WeatherLayer({ scene }: { scene: Scene }) {
   if (w === "wind") {
     return (
       <svg
-        className="scene-layer"
+        key={w}
+        className="scene-layer layer-in"
         viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
@@ -300,7 +316,8 @@ export function WeatherLayer({ scene }: { scene: Scene }) {
   const count = PARTICLES[w];
   return (
     <svg
-      className="scene-layer"
+      key={w}
+      className="scene-layer layer-in"
       viewBox={`0 0 ${SCENE_W} ${SCENE_H}`}
       preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"

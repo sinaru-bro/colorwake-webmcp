@@ -47,6 +47,7 @@ export const ANCHORS: Record<Anchor, Position> = {
 export type PlaceId = "blank" | "home" | "sea" | "sky" | "playground" | "park" | "mountain";
 export type TimeId = "day" | "night";
 export type WeatherId = "clear" | "rain" | "snow" | "cloudy" | "wind" | "thunder";
+export type SceneAxis = "place" | "time" | "weather";
 export type EffectId = "stars" | "hearts" | "bubbles";
 export type Intensity = "light" | "normal" | "heavy";
 
@@ -57,9 +58,9 @@ export interface ActiveEffect {
 }
 
 export interface Scene {
-  place: PlaceId;
-  time: TimeId;
-  weather: WeatherId;
+  place: PlaceId | null;
+  time: TimeId | null;
+  weather: WeatherId | null;
   effects: ActiveEffect[];
 }
 
@@ -150,5 +151,5 @@ export const LIMITS = {
   scale: { min: 0.5, max: 2 },
 } as const;
 
-export const DEFAULT_SCENE: Scene = { place: "blank", time: "day", weather: "clear", effects: [] };
+export const DEFAULT_SCENE: Scene = { place: null, time: null, weather: null, effects: [] };
 export const DEFAULT_TOOL: ToolState = { tool: "fill", color: "red", size: "m" };
