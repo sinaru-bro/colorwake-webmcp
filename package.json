@@ -1,0 +1,44 @@
+{
+  "name": "colorwake",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Color a picture, then say what it should do — a WebMCP coloring studio for preschoolers.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler deploy",
+    "lint": "oxlint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "check:content": "node scripts/check-content.mjs",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm run test && npm run check:content"
+  },
+  "dependencies": {
+    "@fontsource-variable/baloo-2": "^5.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "zod": "^4.5.4",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "oxlint": "^1.79.0",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11",
+    "webmcp-types": "^0.1.5",
+    "wrangler": "^4.127.1"
+  }
+}
