@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-rig="winged">
+  <g data-part="tail" data-pivot="362 300">
+    <path data-region="tail" d="M356 280 L444 238 C458 270 458 322 444 346 L356 320 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="wing-r" data-pivot="256 246">
+    <path data-region="wing-r" d="M250 246 C300 176 400 176 402 262 C360 250 300 250 250 246 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="body" data-pivot="256 300">
+    <g data-outline="true">
+      <path d="M222 380 L216 404 M290 380 L296 404" fill="none" stroke="#2B2B2B" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <path data-region="feet" d="M158 420 L182 386 L256 402 L330 386 L354 420 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="body" d="M136 300 C136 254 190 216 256 216 C322 216 376 254 376 300 C376 346 322 386 256 386 C190 386 136 346 136 300 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="belly" d="M176 336 C200 372 312 372 336 336 C312 354 200 354 176 336 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="wing-l" data-pivot="226 268">
+    <path data-region="wing-l" d="M222 266 C280 236 354 258 346 320 C300 334 240 322 222 266 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="head" data-pivot="188 252">
+    <path data-region="crest" d="M136 156 C126 112 158 100 166 134 C176 102 210 108 198 152 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="beak" d="M100 196 L36 216 L100 236 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="head" d="M96 208 C96 172 124 144 160 144 C196 144 224 172 224 208 C224 244 196 272 160 272 C124 272 96 244 96 208 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <g data-outline="true">
+      <circle cx="134" cy="200" r="13" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="4"/>
+      <circle cx="130" cy="202" r="6" fill="#2B2B2B"/>
+    </g>
+  </g>
+</svg>

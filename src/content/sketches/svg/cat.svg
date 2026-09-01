@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-rig="quadruped">
+  <g data-part="tail" data-pivot="368 300">
+    <path data-region="tail" d="M360 314 C420 300 446 250 430 196 C424 176 402 176 400 198 C412 246 392 278 352 286 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="leg-fr" data-pivot="214 350">
+    <path data-region="leg-fr" d="M196 350 L232 350 L232 404 C232 414 224 420 214 420 C204 420 196 414 196 404 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="leg-br" data-pivot="330 350">
+    <path data-region="leg-br" d="M312 350 L348 350 L348 404 C348 414 340 420 330 420 C320 420 312 414 312 404 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="body" data-pivot="250 300">
+    <path data-region="body" d="M120 300 C120 250 178 222 250 222 C322 222 380 250 380 300 C380 350 322 378 250 378 C178 378 120 350 120 300 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="belly" d="M172 332 C190 366 310 366 328 332 C310 350 190 350 172 332 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="leg-fl" data-pivot="172 350">
+    <path data-region="leg-fl" d="M154 350 L190 350 L190 404 C190 414 182 420 172 420 C162 420 154 414 154 404 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="leg-bl" data-pivot="290 350">
+    <path data-region="leg-bl" d="M272 350 L308 350 L308 404 C308 414 300 420 290 420 C280 420 272 414 272 404 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="head" data-pivot="176 254">
+    <g data-part="ear-l" data-pivot="104 154">
+      <path data-region="ear-l" d="M94 168 L82 88 L146 136 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <g data-part="ear-r" data-pivot="188 154">
+      <path data-region="ear-r" d="M198 168 L210 88 L146 136 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <path data-region="head" d="M78 200 C78 162 108 132 146 132 C184 132 214 162 214 200 C214 238 184 268 146 268 C108 268 78 238 78 200 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <g data-outline="true">
+      <circle cx="124" cy="192" r="7" fill="#2B2B2B"/>
+      <circle cx="168" cy="192" r="7" fill="#2B2B2B"/>
+      <path d="M140 214 L152 214 L146 224 Z" fill="#2B2B2B"/>
+      <path d="M146 224 C140 236 128 236 124 230 M146 224 C152 236 164 236 168 230" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+      <path d="M62 206 L108 212 M62 226 L108 222 M230 206 L184 212 M230 226 L184 222" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

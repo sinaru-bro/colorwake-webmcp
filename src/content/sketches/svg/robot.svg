@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-rig="biped">
+  <g data-part="leg-l" data-pivot="226 346">
+    <path data-region="leg-l" d="M206 346 L246 346 L246 392 L206 392 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="foot-l" d="M190 400 C190 393 196 388 202 388 L240 388 C246 388 252 393 252 400 L252 420 L190 420 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="leg-r" data-pivot="286 346">
+    <path data-region="leg-r" d="M266 346 L306 346 L306 392 L266 392 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="foot-r" d="M260 400 C260 393 266 388 272 388 L310 388 C316 388 322 393 322 400 L322 420 L260 420 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <g data-part="arm-l" data-pivot="160 226">
+    <path data-region="arm-l" d="M140 224 L180 224 L180 316 L140 316 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <g data-part="hand-l" data-pivot="160 318">
+      <path data-region="hand-l" d="M138 338 C138 326 148 316 160 316 C172 316 182 326 182 338 C182 350 172 360 160 360 C148 360 138 350 138 338 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+  </g>
+  <g data-part="arm-r" data-pivot="352 226">
+    <path data-region="arm-r" d="M332 224 L372 224 L372 316 L332 316 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <g data-part="hand-r" data-pivot="352 318">
+      <path data-region="hand-r" d="M330 338 C330 326 340 316 352 316 C364 316 374 326 374 338 C374 350 364 360 352 360 C340 360 330 350 330 338 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+  </g>
+  <g data-part="body" data-pivot="256 280">
+    <path data-region="body" d="M200 214 L312 214 C320 214 326 220 326 228 L326 336 C326 344 320 350 312 350 L200 350 C192 350 186 344 186 336 L186 228 C186 220 192 214 200 214 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="chest" d="M216 238 L296 238 L296 300 L216 300 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <g data-outline="true">
+      <circle cx="200" cy="228" r="5" fill="#2B2B2B"/>
+      <circle cx="312" cy="228" r="5" fill="#2B2B2B"/>
+      <circle cx="200" cy="336" r="5" fill="#2B2B2B"/>
+      <circle cx="312" cy="336" r="5" fill="#2B2B2B"/>
+    </g>
+  </g>
+  <g data-part="head" data-pivot="256 212">
+    <path data-region="antenna" d="M246 112 L246 84 C236 82 234 66 246 62 C252 60 260 60 266 62 C278 66 276 82 266 84 L266 112 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="head" d="M208 110 L304 110 C312 110 318 116 318 124 L318 200 C318 208 312 214 304 214 L208 214 C200 214 194 208 194 200 L194 124 C194 116 200 110 208 110 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <g data-outline="true">
+      <circle cx="230" cy="150" r="14" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="4"/>
+      <circle cx="282" cy="150" r="14" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="4"/>
+      <circle cx="232" cy="152" r="6" fill="#2B2B2B"/>
+      <circle cx="284" cy="152" r="6" fill="#2B2B2B"/>
+      <path d="M226 180 L286 180 L286 196 L226 196 Z M246 180 L246 196 M266 180 L266 196" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

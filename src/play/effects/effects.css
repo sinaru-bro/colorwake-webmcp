@@ -1,0 +1,54 @@
+.effects-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fx {
+  position: absolute;
+  line-height: 1;
+  will-change: transform, opacity;
+}
+
+.fx-star {
+  color: #fff3b0;
+  font-size: 22px;
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+
+.fx-heart {
+  color: #f27da8;
+  animation: rise 4s ease-out infinite;
+}
+
+.fx-bubble {
+  color: #4cc3f0;
+  animation: rise 5s linear infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-60vh) scale(1.2);
+  }
+}
