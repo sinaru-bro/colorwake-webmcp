@@ -1,4 +1,4 @@
-import type { Preset, RigId } from "../../../state/types";
+import type { Preset, RigId, Variant } from "../../../state/types";
 import { BIPED_PRESETS } from "./biped";
 import { OBJECT_PRESETS } from "./object";
 import { QUADRUPED_PRESETS } from "./quadruped";
@@ -40,4 +40,25 @@ export function findPreset(id: string, rig: RigId): { preset: Preset; source: Pr
     if (hit) return { preset: hit, source: "other" };
   }
   return null;
+}
+
+/** Variant ids worth telling the helper about — presets with only one way have none. */
+export function variantIds(preset: Preset): string[] | undefined {
+  return preset.variants.length > 1 ? preset.variants.map((v) => v.id) : undefined;
+}
+
+/**
+ * Picks how to do a preset: the requested variant, the only one, or a random one that differs
+ * from `avoid` (the variant this character did last) so repeats stay fresh.
+ */
+export function chooseVariant(
+  preset: Preset,
+  requested?: string | null,
+  avoid?: string | null,
+  random: () => number = Math.random,
+): Variant | null {
+  if (requested) return preset.variants.find((v) => v.id === requested) ?? null;
+  if (preset.variants.length === 1) return preset.variants[0];
+  const pool = preset.variants.filter((v) => v.id !== avoid);
+  return pool[Math.min(pool.length - 1, Math.floor(random() * pool.length))];
 }

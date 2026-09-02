@@ -1,7 +1,31 @@
 import type { Preset } from "../../../state/types";
+import {
+  bounce,
+  danceVariants,
+  fade,
+  flyVariants,
+  many,
+  move,
+  one,
+  rot,
+  scale,
+  shake,
+  swimVariants,
+  tilt,
+  wave,
+} from "./shared";
 
 export const OBJECT_PRESETS: Preset[] = [
-  {
+  one({
+    id: "greet",
+    rig: "object",
+    label: "Say hi",
+    sayings: ["hi", "hello", "bye-bye", "wave"],
+    mode: "parallel",
+    loop: 2,
+    steps: [tilt(10, 700), bounce(5, 700), scale(1, 1.25, 350, "accent-1")],
+  }),
+  one({
     id: "launch",
     rig: "object",
     label: "Launch",
@@ -9,41 +33,60 @@ export const OBJECT_PRESETS: Preset[] = [
     mode: "parallel",
     loop: false,
     steps: [
-      { primitive: "shake", params: { amplitude: 5, cycles: 5 }, durationMs: 500 },
+      shake(5, 5, 500),
       {
         primitive: "move",
-        params: { dy: -200, path: "line", hold: true },
-        durationMs: 1200,
+        params: { dy: -900, path: "line", hold: true },
+        durationMs: 1400,
         ease: "ease-in",
         delayMs: 500,
       },
-      { primitive: "scale", part: "accent-1", params: { from: 1, to: 1.5 }, durationMs: 300 },
-      { primitive: "scale", part: "accent-1", params: { from: 1, to: 1.5 }, durationMs: 300, delayMs: 350 },
+      scale(1, 1.5, 300, "accent-1"),
+      { ...scale(1, 1.5, 300, "accent-1"), delayMs: 350 },
     ],
-  },
-  {
+  }),
+  one({
     id: "wobble",
     rig: "object",
     label: "Wobble",
     sayings: ["teeter", "rock"],
     mode: "parallel",
     loop: true,
-    steps: [
-      { primitive: "tilt", params: { angle: 12, side: "both" }, durationMs: 700 },
-      { primitive: "rotate", part: "accent-1", params: { from: -10, to: 10 }, durationMs: 700 },
-    ],
-  },
-  {
+    steps: [tilt(12, 700), rot("accent-1", -10, 10, 700)],
+  }),
+  one({
     id: "sparkle",
     rig: "object",
     label: "Sparkle",
     sayings: ["shine", "twinkle", "glow"],
     mode: "parallel",
     loop: true,
+    steps: [fade(0.55, 600, 2), scale(1, 1.08, 600), scale(1, 1.3, 300, "accent-2")],
+  }),
+  many(
+    { id: "fly", rig: "object", label: "Fly", sayings: ["float", "soar", "fly up"] },
+    flyVariants({ rotate: 90 }, [scale(1, 1.4, 300, "accent-1"), wave("accent-2", 6, 1, 900)]),
+  ),
+  many(
+    { id: "swim", rig: "object", label: "Swim", sayings: ["paddle", "go swimming"] },
+    swimVariants({ rotate: 80 }, [wave("accent-1", 20, 2, 800), scale(1, 1.15, 800, "accent-2")]),
+  ),
+  many(
+    { id: "dance", rig: "object", label: "Dance", sayings: ["boogie", "party", "groove"] },
+    danceVariants([rot("accent-1", -15, 15, 420), scale(1, 1.2, 840, "accent-2")]),
+  ),
+  one({
+    id: "zoom",
+    rig: "object",
+    label: "Zoom",
+    sayings: ["speed", "race", "vroom"],
+    mode: "parallel",
+    loop: true,
     steps: [
-      { primitive: "fade", params: { to: 0.55, flicker: 2 }, durationMs: 600 },
-      { primitive: "scale", params: { from: 1, to: 1.08 }, durationMs: 600 },
-      { primitive: "scale", part: "accent-2", params: { from: 1, to: 1.3 }, durationMs: 300 },
+      move(900, 0, "line", 1800),
+      tilt(10, 1800),
+      shake(6, 4, 400, "accent-1"),
+      scale(1, 1.5, 300, "accent-1"),
     ],
-  },
+  }),
 ];

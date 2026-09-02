@@ -2,7 +2,6 @@ import { colorAnother, enterPlay } from "../../state/actions";
 import { nextQuestion } from "../../state/selectors";
 import { getState } from "../../state/store";
 import { LIMITS } from "../../state/types";
-import { uiStore } from "../../state/ui";
 import { summarize } from "../describe";
 import { fail, ok } from "../results";
 import { SetModeInput } from "../schemas";
@@ -12,7 +11,7 @@ export const setMode = defineTool({
   name: "set_mode",
   title: "Switch between coloring and playing",
   description:
-    'Switch between coloring and playing, exactly like the two on-screen buttons. mode "play" saves the current picture and turns the canvas into the play screen where colored pictures come alive — use when the child says they are done or wants to play. mode "color" saves and goes back to coloring with the sketch strip open — use when the child wants to color another picture. A picture needs at least one color before it can play.',
+    'Switch between coloring and playing, like the on-screen buttons ("Let\'s play with my friends!" and the + in My friends). mode "play" puts the current picture in My friends and turns the canvas into the play screen, where up to 3 friends come alive — use when the child says they are done or wants to play. mode "color" goes back to coloring with the sketch strip open — use when the child wants to color another picture. A picture needs at least one color before it can play.',
   schema: SetModeInput,
   execute(input) {
     const parsed = parseInput(SetModeInput, input);
@@ -31,8 +30,9 @@ export const setMode = defineTool({
         saved: res.saved,
         dropped: res.dropped,
         tray: { count: s.characters.length, capacity: LIMITS.maxCharacters },
-        characters: s.characters.map(summarize),
-        nextQuestion: nextQuestion(s.scene, uiStore.getState().skipped),
+        stage: { count: s.cast.length, capacity: LIMITS.maxOnStage },
+        characters: s.characters.map((c) => ({ ...summarize(c), onStage: s.cast.includes(c.id) })),
+        nextQuestion: nextQuestion(s.scene),
       });
     }
     const res = colorAnother();

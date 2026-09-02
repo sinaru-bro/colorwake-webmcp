@@ -1,10 +1,9 @@
 import { useEffect } from "react";
-import { colorAnother, enterPlay, startFresh } from "../state/actions";
+import { startFresh } from "../state/actions";
 import { clearSaved } from "../state/persistence";
 import { ui, useUi } from "../state/ui";
-import { usePlayLabel } from "./usePlayLabel";
 
-const TOAST_MS = 3000;
+const NOTICE_MS = 3500;
 
 export function ResumeDialog() {
   const pending = useUi((s) => s.resumePending);
@@ -39,36 +38,18 @@ export function ResumeDialog() {
   );
 }
 
-export function DoneSheet() {
-  const open = useUi((s) => s.doneSheetOpen);
-  const label = usePlayLabel();
-  if (!open) return null;
-  return (
-    <>
-      <div className="sheet-scrim" onClick={() => ui.setDoneSheet(false)} aria-hidden="true" />
-      <div className="sheet" role="dialog" aria-label="Done">
-        <button type="button" className="sheet__btn" onClick={() => colorAnother()}>
-          Save &amp; color another
-        </button>
-        <button type="button" className="sheet__btn sheet__btn--primary" onClick={() => enterPlay()}>
-          {label}
-        </button>
-      </div>
-    </>
-  );
-}
-
-export function Toast() {
-  const message = useUi((s) => s.toast);
+export function Notice() {
+  const notice = useUi((s) => s.notice);
   useEffect(() => {
-    if (!message) return;
-    const t = setTimeout(() => ui.toast(null), TOAST_MS);
+    if (!notice) return;
+    const t = setTimeout(() => ui.notice(null), NOTICE_MS);
     return () => clearTimeout(t);
-  }, [message]);
-  if (!message) return null;
+  }, [notice]);
+  if (!notice) return null;
   return (
-    <div className="toast" role="status">
-      {message}
+    <div key={notice.title} className="notice" role="status">
+      <span className="notice__title">{notice.title}</span>
+      <span className="notice__hint">{notice.hint}</span>
     </div>
   );
 }

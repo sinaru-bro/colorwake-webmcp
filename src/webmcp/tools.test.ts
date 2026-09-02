@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { enterPlay, fillRegion, pickSketch, resetAll } from "../state/actions";
+import { arrangeScene, enterPlay, fillRegion, pickSketch, resetAll } from "../state/actions";
 import { getState } from "../state/store";
 import { describeState } from "./describe";
 import { getEngine, setEngine, type EnginePlayRequest } from "./engineBridge";
@@ -37,8 +37,8 @@ describe("tool registry", () => {
       "pick_sketch",
       "set_tool",
       "apply_motion",
+      "apply_motions",
       "arrange_scene",
-      "add_effect",
     ]);
     for (const t of TOOLS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -99,13 +99,10 @@ describe("pick_sketch", () => {
     expect(res.options).toContain("cat");
   });
   it("reports a full tray with the shared message", () => {
-    colored("cat");
-    colored("fish");
-    colored("bird");
-    colored("robot");
+    for (let i = 0; i < 20; i += 1) colored("cat");
     const res = call("pick_sketch", { sketch: "rocket" });
     expect(res).toMatchObject({ ok: false, code: "tray_full", error: TRAY_FULL_MESSAGE });
-    expect(getState().characters).toHaveLength(4);
+    expect(getState().characters).toHaveLength(20);
   });
   it("switches back to color mode from play", () => {
     colored("cat");
@@ -117,9 +114,18 @@ describe("pick_sketch", () => {
 });
 
 describe("set_tool", () => {
-  it("maps css colors to the nearest palette color", () => {
-    const res = call("set_tool", { color: "#87ceeb" });
-    expect(res).toMatchObject({ ok: true, tool: { color: "sky" }, mapped: { from: "#87ceeb", to: "sky" } });
+  it("keeps a hex as a custom color and names css colors", () => {
+    expect(call("set_tool", { color: "#87CEEB" })).toMatchObject({
+      ok: true,
+      tool: { color: "#87ceeb" },
+      mapped: null,
+    });
+    expect(call("set_tool", { color: "teal" })).toMatchObject({
+      ok: true,
+      tool: { color: "#008080" },
+      mapped: { from: "teal", to: "#008080" },
+    });
+    expect(call("set_tool", { color: "light blue" })).toMatchObject({ ok: true, tool: { color: "sky" } });
   });
   it("requires at least one field", () => {
     expect(call("set_tool", {})).toMatchObject({ ok: false, code: "nothing_to_change" });
@@ -128,6 +134,7 @@ describe("set_tool", () => {
     const res = call("set_tool", { color: "not-a-color" });
     expect(res).toMatchObject({ ok: false, code: "unknown_color" });
     expect(res.options).toHaveLength(12);
+    expect(res.options).toContain("#rrggbb");
   });
 });
 
@@ -173,10 +180,10 @@ describe("apply_motion", () => {
         return { ok: true, durationMs: 2400, skipped: [], fallback: null };
       },
     });
-    const res = call("apply_motion", { character: id, motion: "fly", speed: 9 });
+    const res = call("apply_motion", { character: id, motion: "spin", speed: 9 });
     expect(res).toMatchObject({
       ok: true,
-      motion: "fly",
+      motion: "spin",
       source: "universal",
       switchedTo: "play",
       clamped: { speed: 2 },
@@ -227,27 +234,28 @@ describe("arrange_scene", () => {
   });
 });
 
-describe("add_effect", () => {
-  it("refuses to attach stars to a character", () => {
-    const id = colored("cat");
-    expect(call("add_effect", { effect: "stars", character: id })).toMatchObject({
-      ok: false,
-      code: "effect_not_attachable",
-    });
+describe("play screen", () => {
+  it("tells which friends are on stage", () => {
+    const ids = ["cat", "fish", "bird", "robot"].map((s) => colored(s));
+    enterPlay();
+    const state = describeState(getState()) as {
+      stage: unknown;
+      characters: { id: string; onStage: boolean }[];
+    };
+    expect(state.stage).toEqual({ count: 3, capacity: 3 });
+    expect(state.characters.map((c) => c.onStage)).toEqual([false, true, true, true]);
+    expect(getState().cast).toEqual(ids.slice(1));
   });
-  it("caps at three effects", () => {
-    const id = colored("cat");
-    expect(call("add_effect", { effect: "stars" }).ok).toBe(true);
-    expect(call("add_effect", { effect: "hearts" }).ok).toBe(true);
-    expect(call("add_effect", { effect: "bubbles", character: id }).ok).toBe(true);
-    expect(call("add_effect", { effect: "hearts", character: id })).toMatchObject({
-      ok: false,
-      code: "too_many_effects",
+  it("apply_motion brings an off-stage friend on", () => {
+    const [a] = ["cat", "fish", "bird", "robot"].map((s) => colored(s));
+    enterPlay();
+    expect(call("apply_motion", { character: a, motion: "fly" })).toMatchObject({
+      ok: true,
+      broughtOnStage: true,
     });
-  });
-  it("points weather words at arrange_scene", () => {
-    colored("cat");
-    expect(call("add_effect", { effect: "rain" }).hint).toMatch(/arrange_scene/);
+    expect(getState().cast).toContain(a);
+    expect(getState().cast).toHaveLength(3);
+    expect(call("apply_motion", { character: a, motion: "fly" })).toMatchObject({ broughtOnStage: false });
   });
 });
 
@@ -272,9 +280,159 @@ describe("read tools", () => {
   it("list_motions includes stop among universal presets and scene options", () => {
     const res = call("list_motions") as Result & {
       universal: { id: string }[];
-      scene: { effects: string[] };
+      scene: { places: string[]; times: string[]; weathers: string[] };
     };
     expect(res.universal.map((u) => u.id)).toContain("stop");
-    expect(res.scene.effects).toEqual(["stars", "hearts", "bubbles"]);
+    expect(res.scene.places).toHaveLength(12);
+    expect(res.scene.times).toEqual(["day", "night"]);
+  });
+});
+
+function capture(): { reqs: EnginePlayRequest[]; stopped: string[] } {
+  const reqs: EnginePlayRequest[] = [];
+  const stopped: string[] = [];
+  setEngine({
+    ...getEngine(),
+    play: (r) => {
+      reqs.push(r);
+      return { ok: true, durationMs: 1000, skipped: [], fallback: null };
+    },
+    stop: (c) => {
+      stopped.push(c);
+    },
+    stageSize: () => ({ w: 1180, h: 654 }),
+  });
+  return { reqs, stopped };
+}
+
+describe("variants and poses", () => {
+  it("uses the character's own posed preset and reports the variant", () => {
+    const id = colored("robot");
+    const { reqs } = capture();
+    const res = call("apply_motion", { character: id, motion: "swim", variant: "across" });
+    expect(res).toMatchObject({ ok: true, motion: "swim", variant: "across", source: "rig" });
+    expect(reqs[0]).toMatchObject({ variant: "across", pose: { rotate: 80 } });
+  });
+  it("never repeats the last variant when none is asked for", () => {
+    const id = colored("cat");
+    capture();
+    const seen = new Set<string>();
+    let last: string | null = null;
+    for (let i = 0; i < 12; i++) {
+      const v = call("apply_motion", { character: id, motion: "fly" }).variant as string;
+      expect(v).not.toBe(last);
+      seen.add(v);
+      last = v;
+    }
+    expect(seen.size).toBeGreaterThan(1);
+  });
+  it("rejects an unknown variant with the real ones", () => {
+    const id = colored("cat");
+    const res = call("apply_motion", { character: id, motion: "dance", variant: "moonwalk" });
+    expect(res).toMatchObject({ ok: false, code: "unknown_variant" });
+    expect(res.options).toEqual(["bop", "twist", "hop", "spin"]);
+  });
+  it("gives single-way presets no variant", () => {
+    const id = colored("cat");
+    capture();
+    expect(call("apply_motion", { character: id, motion: "wag" })).toMatchObject({ ok: true, variant: null });
+  });
+});
+
+describe("place actions", () => {
+  it("needs the right place and says which", () => {
+    const id = colored("cat");
+    enterPlay();
+    arrangeScene({ place: "sea" });
+    const res = call("apply_motion", { character: id, motion: "swing" });
+    expect(res).toMatchObject({ ok: false, code: "not_here", options: ["playground"] });
+    expect(call("apply_motion", { character: id, motion: "inside" }).options).toEqual(["school", "home"]);
+  });
+  it("moves the friend to the prop, shrinks it, and hands the engine the action", () => {
+    const id = colored("cat");
+    enterPlay();
+    arrangeScene({ place: "playground" });
+    const { reqs } = capture();
+    const res = call("apply_motion", { character: id, motion: "swing" });
+    expect(res).toMatchObject({ ok: true, action: "swing", place: "playground", loop: true });
+    const c = getState().characters.find((x) => x.id === id)!;
+    expect(c.scale).toBeCloseTo(0.6);
+    expect(c.position.x).toBeGreaterThan(0.2);
+    expect(c.position.x).toBeLessThan(0.35);
+    expect(c.position.y).toBeLessThan(0.78);
+    expect(reqs[0]).toMatchObject({ action: { id: "swing" }, loop: true, mode: "parallel" });
+    expect(reqs[0].steps.length).toBeGreaterThan(0);
+  });
+  it("gets off the prop on stop, on another motion, and when the place changes", () => {
+    const id = colored("cat");
+    enterPlay();
+    arrangeScene({ place: "playground" });
+    const { stopped } = capture();
+    call("apply_motion", { character: id, motion: "swing" });
+    call("apply_motion", { character: id, motion: "stop" });
+    expect(getState().characters[0].scale).toBe(1);
+    call("apply_motion", { character: id, motion: "slide" });
+    expect(getState().characters[0].scale).toBeCloseTo(0.6);
+    call("apply_motion", { character: id, motion: "jump" });
+    expect(getState().characters[0].scale).toBe(1);
+    call("apply_motion", { character: id, motion: "swing" });
+    call("arrange_scene", { place: "home" });
+    expect(getState().characters[0].scale).toBe(1);
+    expect(stopped).toContain(id);
+  });
+  it("lists what the current place allows", () => {
+    colored("cat");
+    enterPlay();
+    arrangeScene({ place: "school" });
+    const list = call("list_motions") as Result & {
+      placeActions: { here: { id: string }[]; elsewhere: Record<string, string[]> };
+      presets: { id: string; variants?: string[] }[];
+    };
+    expect(list.placeActions.here.map((a) => a.id)).toEqual(["bus", "inside"]);
+    expect(list.placeActions.elsewhere.playground).toEqual(["swing", "slide"]);
+    expect(list.presets.find((p) => p.id === "fly")?.variants).toEqual(["around", "away", "high", "loop"]);
+    expect((describeState(getState()) as { placeActions: string[] }).placeActions).toEqual(["bus", "inside"]);
+  });
+});
+
+describe("apply_motions", () => {
+  it("starts up to three friends in one call", () => {
+    const ids = ["cat", "fish", "bird"].map((s) => colored(s));
+    const { reqs } = capture();
+    const res = call("apply_motions", {
+      actions: [
+        { character: ids[0], motion: "dance" },
+        { character: ids[1], motion: "swim" },
+        { character: ids[2], motion: "fly", variant: "high" },
+      ],
+    }) as Result & { results: Result[] };
+    expect(res).toMatchObject({ ok: true, started: 3 });
+    expect(res.results.map((r) => r.ok)).toEqual([true, true, true]);
+    expect(reqs).toHaveLength(3);
+    expect(reqs[2]).toMatchObject({ preset: "fly", variant: "high" });
+    expect(getState().mode).toBe("play");
+  });
+  it("reports each action on its own when one fails", () => {
+    const id = colored("cat");
+    capture();
+    const res = call("apply_motions", {
+      actions: [
+        { character: id, motion: "dance" },
+        { character: "ghost", motion: "dance" },
+      ],
+    }) as Result & { results: Result[] };
+    expect(res).toMatchObject({ ok: true, started: 1 });
+    expect(res.results[0].ok).toBe(true);
+    expect(res.results[1]).toMatchObject({ ok: false, code: "unknown_character" });
+  });
+  it("fails as a whole when nothing starts, and rejects four actions", () => {
+    colored("cat");
+    capture();
+    const none = call("apply_motions", { actions: [{ character: "ghost", motion: "dance" }] });
+    expect(none).toMatchObject({ ok: false, code: "all_failed" });
+    const four = call("apply_motions", {
+      actions: Array.from({ length: 4 }, () => ({ character: "cat", motion: "dance" })),
+    });
+    expect(four).toMatchObject({ ok: false, code: "bad_input" });
   });
 });

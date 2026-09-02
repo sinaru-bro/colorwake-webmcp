@@ -1,15 +1,11 @@
 import { sketchById } from "../content/sketches/catalog";
-import { MAX_EFFECTS } from "../content/effects";
 import { newId } from "../lib/ids";
 import { activeCharacter, coloredCharacters, isColored } from "./selectors";
 import { getState, patch, replaceState, initialState } from "./store";
 import {
   ANCHORS,
   LIMITS,
-  type ActiveEffect,
   type Character,
-  type EffectId,
-  type Intensity,
   type PlaceId,
   type Position,
   type Stroke,
@@ -27,23 +23,44 @@ const AUTO_LAYOUT: Record<number, number[]> = {
   1: [0.5],
   2: [0.35, 0.65],
   3: [0.2, 0.5, 0.8],
-  4: [0.15, 0.38, 0.62, 0.85],
 };
 
 function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-function withAutoLayout(characters: Character[]): Character[] {
-  const auto = characters.filter((c) => c.placement === "auto");
-  const xs = AUTO_LAYOUT[Math.min(4, auto.length)] ?? AUTO_LAYOUT[4];
+/** Spreads the auto-placed characters that are on the play screen along the ground. */
+function withAutoLayout(characters: Character[], cast: string[]): Character[] {
+  const auto = characters.filter((c) => c.placement === "auto" && cast.includes(c.id));
+  const xs = AUTO_LAYOUT[Math.min(LIMITS.maxOnStage, auto.length)] ?? AUTO_LAYOUT[1];
   let i = 0;
   return characters.map((c) => {
-    if (c.placement !== "auto") return c;
+    if (c.placement !== "auto" || !cast.includes(c.id)) return c;
     const x = xs[Math.min(i, xs.length - 1)];
     i += 1;
     return { ...c, position: { x, y: GROUND_Y } };
   });
+}
+
+/** Adds a character to the play screen; when it is full, the longest-standing one steps off. */
+function join(cast: string[], id: string): string[] {
+  return cast.includes(id) ? cast : [...cast, id].slice(-LIMITS.maxOnStage);
+}
+
+/** Drops characters that no longer exist; an empty play screen gets the newest colored ones. */
+function settleCast(cast: string[], characters: Character[]): string[] {
+  const kept = cast.filter((id) => characters.some((c) => c.id === id && isColored(c)));
+  if (kept.length > 0) return kept;
+  return characters
+    .filter(isColored)
+    .slice(-LIMITS.maxOnStage)
+    .map((c) => c.id);
+}
+
+/** State for a colored picture leaving the canvas: it joins the play screen. */
+function stashed(st: StudioState, character: Character | null): { cast: string[]; characters: Character[] } {
+  const cast = character && isColored(character) ? join(st.cast, character.id) : st.cast;
+  return { cast, characters: withAutoLayout(st.characters, cast) };
 }
 
 function newCharacter(sketchId: string): Character {
@@ -78,17 +95,15 @@ export function pickSketch(sketchId: string): PickResult {
       mode: "color",
       characters: st.characters.map((c) => (c.id === active.id ? replaced : c)),
     }));
-    ui.setDoneSheet(false);
     return { ok: true, character: replaced, replaced: true, switchedTo };
   }
   if (s.characters.length >= LIMITS.maxCharacters) return { ok: false, code: "tray_full" };
   const created = newCharacter(sketchId);
   patch((st) => ({
     mode: "color",
-    characters: withAutoLayout([...st.characters, created]),
+    ...stashed({ ...st, characters: [...st.characters, created] }, active),
     activeCharacterId: created.id,
   }));
-  ui.setDoneSheet(false);
   return { ok: true, character: created, replaced: false, switchedTo };
 }
 
@@ -144,19 +159,36 @@ export function enterPlay(): EnterPlayResult {
   const active = activeCharacter(s);
   if (s.mode === "play") return { ok: true, saved: null, dropped: null, already: true };
   if (active && isColored(active)) {
-    patch(() => ({ mode: "play" }));
-    ui.setDoneSheet(false);
+    patch((st) => {
+      const cast = settleCast(join(st.cast, active.id), st.characters);
+      return { mode: "play", cast, characters: withAutoLayout(st.characters, cast) };
+    });
     return { ok: true, saved: active.id, dropped: null, already: false };
   }
   if (coloredCharacters(s).length === 0) return { ok: false, code: "not_colored_yet" };
   const dropped = active?.id ?? null;
-  patch((st) => ({
-    mode: "play",
-    characters: withAutoLayout(st.characters.filter((c) => c.id !== dropped)),
-    activeCharacterId: coloredCharacters(st).at(-1)?.id ?? null,
-  }));
-  ui.setDoneSheet(false);
+  if (dropped) ui.clearUndo(dropped);
+  patch((st) => {
+    const characters = st.characters.filter((c) => c.id !== dropped);
+    const cast = settleCast(st.cast, characters);
+    return {
+      mode: "play",
+      cast,
+      characters: withAutoLayout(characters, cast),
+      activeCharacterId: coloredCharacters(st).at(-1)?.id ?? null,
+    };
+  });
   return { ok: true, saved: null, dropped, already: false };
+}
+
+export type FinishResult = { ok: true; saved: string } | { ok: false; code: "not_colored_yet" };
+
+/** Puts the colored picture on the canvas away in My friends and leaves the canvas empty. */
+export function finishPicture(): FinishResult {
+  const active = activeCharacter(getState());
+  if (!active || !isColored(active)) return { ok: false, code: "not_colored_yet" };
+  patch((st) => ({ mode: "color", ...stashed(st, active), activeCharacterId: null }));
+  return { ok: true, saved: active.id };
 }
 
 export type ColorAnotherResult = { ok: true; saved: string | null; already: boolean };
@@ -168,18 +200,51 @@ export function colorAnother(): ColorAnotherResult {
   const keep = active && isColored(active);
   patch((st) => ({
     mode: "color",
-    characters: keep || !active ? st.characters : st.characters.filter((c) => c.id !== active.id),
+    ...stashed(
+      {
+        ...st,
+        characters: keep || !active ? st.characters : st.characters.filter((c) => c.id !== active.id),
+      },
+      active,
+    ),
     activeCharacterId: null,
   }));
   if (active && !keep) ui.clearUndo(active.id);
-  ui.setDoneSheet(false);
   return { ok: true, saved: keep ? active.id : null, already: false };
 }
 
+/** Puts a picture from My friends back on the canvas; a blank picture left behind is dropped. */
 export function selectCharacter(id: string): boolean {
-  if (!getState().characters.some((c) => c.id === id)) return false;
-  patch(() => ({ mode: "color", activeCharacterId: id }));
+  const s = getState();
+  if (!s.characters.some((c) => c.id === id)) return false;
+  const active = activeCharacter(s);
+  const drop = active && active.id !== id && !isColored(active) ? active.id : null;
+  if (drop) ui.clearUndo(drop);
+  patch((st) => ({
+    mode: "color",
+    ...stashed({ ...st, characters: st.characters.filter((c) => c.id !== drop) }, active),
+    activeCharacterId: id,
+  }));
   return true;
+}
+
+/** Puts a friend on the play screen or takes it off; returns whether it is on now, or null if unknown. */
+export function toggleOnStage(id: string): boolean | null {
+  const s = getState();
+  const character = s.characters.find((c) => c.id === id);
+  if (!character || !isColored(character)) return null;
+  const on = s.cast.includes(id);
+  patch((st) => {
+    const cast = on ? st.cast.filter((c) => c !== id) : join(st.cast, id);
+    return { cast, characters: withAutoLayout(st.characters, cast) };
+  });
+  return !on;
+}
+
+/** Makes sure a friend is on the play screen; returns true when it had to step on. */
+export function bringOnStage(id: string): boolean {
+  if (getState().cast.includes(id)) return false;
+  return toggleOnStage(id) === true;
 }
 
 export function removeCharacter(id: string): boolean {
@@ -187,18 +252,20 @@ export function removeCharacter(id: string): boolean {
   if (!s.characters.some((c) => c.id === id)) return false;
   ui.clearUndo(id);
   patch((st) => {
-    const characters = withAutoLayout(st.characters.filter((c) => c.id !== id));
+    const cast = st.cast.filter((c) => c !== id);
+    const characters = withAutoLayout(
+      st.characters.filter((c) => c.id !== id),
+      cast,
+    );
     const activeCharacterId =
       st.activeCharacterId === id ? (characters.at(-1)?.id ?? null) : st.activeCharacterId;
-    return { characters, activeCharacterId };
+    return { cast, characters, activeCharacterId };
   });
   return true;
 }
 
 export function resetAll(): void {
-  ui.clearSkipped();
   ui.clearUndo();
-  ui.setDoneSheet(false);
   replaceState(initialState());
 }
 
@@ -224,6 +291,8 @@ export function arrangeScene(update: SceneUpdate): StudioState["scene"] {
       ...(update.weather ? { weather: update.weather } : {}),
     };
     const byId = new Map((update.placements ?? []).map((p) => [p.characterId, p]));
+    let cast = st.cast;
+    for (const id of byId.keys()) cast = join(cast, id);
     const characters = st.characters.map((c) => {
       const p = byId.get(c.id);
       if (!p) return c;
@@ -236,7 +305,7 @@ export function arrangeScene(update: SceneUpdate): StudioState["scene"] {
         scale,
       };
     });
-    return { scene, characters: withAutoLayout(characters) };
+    return { scene, cast, characters: withAutoLayout(characters, cast) };
   });
   return getState().scene;
 }
@@ -247,40 +316,8 @@ export function moveCharacter(id: string, position: Position): boolean {
   return true;
 }
 
-export type EffectResult =
-  { ok: true; effects: ActiveEffect[]; updated: boolean } | { ok: false; code: "too_many_effects" };
-
-export function setEffect(
-  id: EffectId | "none",
-  on = true,
-  intensity: Intensity = "normal",
-  target?: string,
-): EffectResult {
-  if (id === "none") {
-    patch((st) => ({ scene: { ...st.scene, effects: [] } }));
-    return { ok: true, effects: [], updated: false };
-  }
-  const current = getState().scene.effects;
-  const idx = current.findIndex((e) => e.id === id && e.target === target);
-  if (!on) {
-    const effects = idx === -1 ? current : current.filter((_, i) => i !== idx);
-    patch((st) => ({ scene: { ...st.scene, effects } }));
-    return { ok: true, effects, updated: false };
-  }
-  if (idx !== -1) {
-    const effects = current.map((e, i) => (i === idx ? { ...e, intensity } : e));
-    patch((st) => ({ scene: { ...st.scene, effects } }));
-    return { ok: true, effects, updated: true };
-  }
-  if (current.length >= MAX_EFFECTS) return { ok: false, code: "too_many_effects" };
-  const effect: ActiveEffect = target ? { id, intensity, target } : { id, intensity };
-  const effects = [...current, effect];
-  patch((st) => ({ scene: { ...st.scene, effects } }));
-  return { ok: true, effects, updated: false };
-}
-
 export function hydrate(state: StudioState): void {
-  replaceState({ ...state, characters: withAutoLayout(state.characters) });
+  replaceState({ ...state, characters: withAutoLayout(state.characters, state.cast) });
 }
 
 export function startFresh(): void {

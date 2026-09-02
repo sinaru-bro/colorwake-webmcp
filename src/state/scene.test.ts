@@ -9,8 +9,7 @@ describe("scene questions", () => {
     expect(nextQuestion({ ...DEFAULT_SCENE, place: "home" })?.axis).toBe("time");
     expect(nextQuestion({ ...DEFAULT_SCENE, place: "home", time: "day" })?.axis).toBe("weather");
     expect(nextQuestion({ ...DEFAULT_SCENE, place: "home", time: "day", weather: "rain" })).toBeNull();
-    expect(nextQuestion(DEFAULT_SCENE, ["place", "time", "weather"])).toBeNull();
-    expect(nextQuestion(DEFAULT_SCENE, ["place"])?.options).toEqual(["day", "night"]);
+    expect(nextQuestion({ ...DEFAULT_SCENE, place: "home" })?.options).toEqual(["day", "night"]);
   });
 });
 
@@ -26,12 +25,12 @@ describe("saved scenes", () => {
     const saved = parseSaved(
       JSON.stringify({ ...base, scene: { place: null, time: null, weather: null, effects: [] } }),
     );
-    expect(saved?.scene).toEqual({ place: null, time: null, weather: null, effects: [] });
+    expect(saved?.scene).toEqual({ place: null, time: null, weather: null });
   });
   it("accepts scenes saved with every axis set", () => {
     const saved = parseSaved(
       JSON.stringify({ ...base, scene: { place: "sea", time: "day", weather: "clear" } }),
     );
-    expect(saved?.scene).toEqual({ place: "sea", time: "day", weather: "clear", effects: [] });
+    expect(saved?.scene).toEqual({ place: "sea", time: "day", weather: "clear" });
   });
 });

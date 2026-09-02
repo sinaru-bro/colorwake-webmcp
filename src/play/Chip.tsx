@@ -1,7 +1,7 @@
 import { useUi } from "../state/ui";
 import { SCENE_ICONS } from "./sceneIcons";
 
-const SHORT_LABELS: Record<string, string> = { park: "Park", thunder: "Thunder" };
+const SHORT_LABELS: Record<string, string> = { park: "Park", thunder: "Thunder", dino: "Dinos" };
 
 interface Props {
   id: string;

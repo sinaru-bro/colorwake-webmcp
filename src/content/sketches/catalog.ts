@@ -6,6 +6,7 @@ export const SKETCHES: SketchMeta[] = [
     title: "Cat",
     rig: "quadruped",
     level: "normal",
+    facing: "left",
     regions: [
       { id: "head", label: "head" },
       { id: "ear-l", label: "left ear" },
@@ -25,6 +26,8 @@ export const SKETCHES: SketchMeta[] = [
     title: "Fish",
     rig: "swimmer",
     level: "normal",
+    facing: "left",
+    baseline: 472,
     regions: [
       { id: "head", label: "head" },
       { id: "body", label: "body" },
@@ -42,6 +45,7 @@ export const SKETCHES: SketchMeta[] = [
     title: "Bird",
     rig: "winged",
     level: "normal",
+    facing: "left",
     regions: [
       { id: "head", label: "head" },
       { id: "beak", label: "beak" },
@@ -60,6 +64,7 @@ export const SKETCHES: SketchMeta[] = [
     title: "Robot",
     rig: "biped",
     level: "normal",
+    facing: "front",
     regions: [
       { id: "head", label: "head" },
       { id: "antenna", label: "antenna" },
@@ -81,6 +86,8 @@ export const SKETCHES: SketchMeta[] = [
     title: "Rocket",
     rig: "object",
     level: "normal",
+    facing: "front",
+    baseline: 472,
     regions: [
       { id: "nose", label: "nose cone" },
       { id: "body", label: "body" },

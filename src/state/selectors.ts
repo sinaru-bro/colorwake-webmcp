@@ -83,8 +83,14 @@ export function nearestAnchor(p: Position): Anchor {
   return best;
 }
 
-export function trayCount(s: StudioState): number {
-  return s.characters.length;
+/** Pictures in My friends: everything except the one still on the canvas. */
+export function savedCharacters(s: StudioState): Character[] {
+  return s.mode === "color" ? s.characters.filter((c) => c.id !== s.activeCharacterId) : s.characters;
+}
+
+/** Characters on the play screen, in creation order. */
+export function castCharacters(s: StudioState): Character[] {
+  return s.characters.filter((c) => s.cast.includes(c.id));
 }
 
 export interface SceneQuestion {
@@ -99,12 +105,10 @@ const QUESTIONS: Array<{ axis: SceneAxis; ask: string; options: () => string[] }
   { axis: "weather", ask: "What's the weather?", options: () => WEATHERS.map((w) => w.id) },
 ];
 
-/** The first scene axis still unset (and not skipped), shared by the on-screen guide and tool results. */
-export function nextQuestion(scene: Scene, skipped: readonly SceneAxis[] = []): SceneQuestion | null {
+/** The first scene axis still unset, shared by the on-screen guide and tool results. */
+export function nextQuestion(scene: Scene): SceneQuestion | null {
   for (const q of QUESTIONS) {
-    if (scene[q.axis] === null && !skipped.includes(q.axis)) {
-      return { axis: q.axis, ask: q.ask, options: q.options() };
-    }
+    if (scene[q.axis] === null) return { axis: q.axis, ask: q.ask, options: q.options() };
   }
   return null;
 }

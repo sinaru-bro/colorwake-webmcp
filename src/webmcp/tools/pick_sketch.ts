@@ -6,13 +6,13 @@ import { fail, ok } from "../results";
 import { PickSketchInput } from "../schemas";
 import { defineTool, MAX_OPTIONS, parseInput } from "./shared";
 
-export const TRAY_FULL_MESSAGE = "Tray is full — hold a picture in the tray to remove it";
+export const TRAY_FULL_MESSAGE = "All 20 spots in My friends are full — hold a picture there to remove it";
 
 export const pickSketch = defineTool({
   name: "pick_sketch",
   title: "Put a sketch on the canvas",
   description:
-    "Put a coloring sketch on the canvas for the child to color, exactly like tapping it in the sketch strip. Use when the child names what they want to color. If the current picture already has color it is kept in the tray (up to 4 pictures); a blank one is replaced. Switches to coloring mode if the child was playing. Does not color anything — the child does the coloring.",
+    "Put a coloring sketch on the canvas for the child to color, exactly like tapping it in the sketch strip. Use when the child names what they want to color. If the current picture already has color it is kept in My friends (up to 20 pictures); a blank one is replaced. Switches to coloring mode if the child was playing. Does not color anything — the child does the coloring.",
   schema: PickSketchInput,
   execute(input) {
     const parsed = parseInput(PickSketchInput, input);

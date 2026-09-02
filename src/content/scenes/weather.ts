@@ -26,7 +26,7 @@ export const WEATHERS: WeatherDef[] = [
     id: "rain",
     label: "Rain",
     sayings: ["raining", "rainy", "shower"],
-    particle: { kind: "drops", count: 40, cycleMs: 900 },
+    particle: { kind: "drops", count: 64, cycleMs: 900 },
     brightness: 0.95,
   },
   {
@@ -55,7 +55,7 @@ export const WEATHERS: WeatherDef[] = [
     id: "thunder",
     label: "Thunderstorm",
     sayings: ["lightning", "storm", "boom"],
-    particle: { kind: "drops", count: 80, cycleMs: 700 },
+    particle: { kind: "drops", count: 110, cycleMs: 700 },
     brightness: 0.6,
     flash: { minGapMs: 4000, maxGapMs: 9000, durationMs: 200 },
   },

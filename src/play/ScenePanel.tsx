@@ -1,15 +1,13 @@
-import { EFFECTS, MAX_EFFECTS } from "../content/effects";
+import { MyFriends } from "../app/MyFriends";
 import { PLACES, TIMES, WEATHERS } from "../content/scenes";
-import { arrangeScene, setEffect } from "../state/actions";
+import { arrangeScene } from "../state/actions";
 import { useStudio } from "../state/store";
-import type { EffectId, PlaceId, TimeId, WeatherId } from "../state/types";
+import type { PlaceId, TimeId, WeatherId } from "../state/types";
 import { SceneChip } from "./Chip";
 import { SCENE_ICONS } from "./sceneIcons";
 
 export function ScenePanel() {
   const scene = useStudio((s) => s.scene);
-  const sceneEffects = scene.effects.filter((e) => !e.target);
-  const full = scene.effects.length >= MAX_EFFECTS;
   return (
     <>
       <section className="side__sec">
@@ -57,25 +55,7 @@ export function ScenePanel() {
           ))}
         </div>
       </section>
-      <section className="side__sec">
-        <span className="side__label">Effects</span>
-        <div className="chips">
-          {EFFECTS.map((e) => {
-            const on = sceneEffects.some((a) => a.id === e.id);
-            return (
-              <SceneChip
-                key={e.id}
-                id={e.id}
-                label={e.label}
-                on={on}
-                disabled={!on && full}
-                flashKey={`effect:${e.id}`}
-                onClick={() => setEffect(e.id as EffectId, !on)}
-              />
-            );
-          })}
-        </div>
-      </section>
+      <MyFriends />
     </>
   );
 }

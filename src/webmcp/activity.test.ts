@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { fillRegion, pickSketch, resetAll } from "../state/actions";
-import { ui, uiStore } from "../state/ui";
+import { uiStore } from "../state/ui";
 import { toolByName } from "./tools";
 
 type Result = Record<string, unknown> & { ok: boolean };
@@ -22,23 +22,21 @@ const last = () => uiStore.getState().activity.at(-1)!;
 
 beforeEach(() => {
   resetAll();
-  ui.clearSkipped();
 });
 
 describe("next question", () => {
-  it("walks place, time, weather and honours skips", () => {
+  it("walks place, time, then weather", () => {
     colored("cat");
     expect(call("set_mode", { mode: "play" }).nextQuestion).toMatchObject({
       axis: "place",
       ask: "Where are we?",
     });
     expect(call("arrange_scene", { place: "sea" }).nextQuestion).toMatchObject({ axis: "time" });
-    ui.skipQuestion("time");
+    expect(call("arrange_scene", { time: "night" }).nextQuestion).toMatchObject({ axis: "weather" });
     expect(call("get_studio_state").nextQuestion).toMatchObject({ axis: "weather" });
     expect(call("arrange_scene", { weather: "snow" }).nextQuestion).toBeNull();
   });
-  it("starts every axis unset and clears skips on reset", () => {
-    ui.skipQuestion("place");
+  it("starts every axis unset", () => {
     resetAll();
     colored("fish");
     expect(call("get_studio_state").scene).toMatchObject({ place: null, time: null, weather: null });
@@ -63,8 +61,6 @@ describe("activity notes", () => {
     expect(uiStore.getState().flash?.keys).toEqual(["place:sea", "time:night"]);
     call("apply_motion", { character: id, motion: "fly" });
     expect(last().kid).toBe("Red cat, fly!");
-    call("add_effect", { effect: "hearts" });
-    expect(last().kid).toBe("Hearts!");
   });
   it("keeps reads quiet and errors honest", () => {
     colored("cat");

@@ -13,11 +13,17 @@ export interface Rig {
   parts: RigPart[];
 }
 
+export type Facing = "left" | "right" | "front";
+
 export interface SketchMeta {
   id: string;
   title: string;
   rig: RigId;
   level: Level;
+  /** Which way the drawing looks when unmirrored; the engine turns it to face travel. */
+  facing: Facing;
+  /** viewBox y of the ground contact line (feet, keel, base). Default 420. */
+  baseline?: number;
   regions: { id: string; label: string }[];
   accents?: { id: "accent-1" | "accent-2"; label: string }[];
   sayings: string[];
@@ -44,24 +50,26 @@ export const ANCHORS: Record<Anchor, Position> = {
   sky: { x: 0.5, y: 0.5 },
 };
 
-export type PlaceId = "blank" | "home" | "sea" | "sky" | "playground" | "park" | "mountain";
+export type PlaceId =
+  | "blank"
+  | "home"
+  | "sea"
+  | "sky"
+  | "beach"
+  | "river"
+  | "playground"
+  | "park"
+  | "mountain"
+  | "dino"
+  | "space"
+  | "school";
 export type TimeId = "day" | "night";
 export type WeatherId = "clear" | "rain" | "snow" | "cloudy" | "wind" | "thunder";
 export type SceneAxis = "place" | "time" | "weather";
-export type EffectId = "stars" | "hearts" | "bubbles";
-export type Intensity = "light" | "normal" | "heavy";
-
-export interface ActiveEffect {
-  id: EffectId;
-  intensity: Intensity;
-  target?: string;
-}
-
 export interface Scene {
   place: PlaceId | null;
   time: TimeId | null;
   weather: WeatherId | null;
-  effects: ActiveEffect[];
 }
 
 export interface Stroke {
@@ -99,6 +107,8 @@ export interface StudioState {
   mode: Mode;
   characters: Character[];
   activeCharacterId: string | null;
+  /** Characters on the play screen, longest-standing first. */
+  cast: string[];
   tool: ToolState;
   scene: Scene;
   updatedAt: number;
@@ -129,21 +139,37 @@ export interface MotionRequest {
   loop: boolean | number;
 }
 
+/** A body angle held for the whole motion, in degrees clockwise in the drawing's own frame. */
+export interface Pose {
+  rotate: number;
+}
+
+export interface Motion {
+  steps: Step[];
+  mode: PlayMode;
+  loop: boolean | number;
+  pose?: Pose;
+}
+
+/** One way of doing a preset; presets with several let the helper pick or the app vary them. */
+export interface Variant extends Motion {
+  id: string;
+  label: string;
+}
+
 export interface Preset {
   id: string;
   rig: RigId | "any";
   label: string;
   sayings: string[];
-  steps: Step[];
-  mode: PlayMode;
-  loop: boolean | number;
+  variants: Variant[];
 }
 
 export const LIMITS = {
-  maxCharacters: 4,
+  maxCharacters: 20,
+  maxOnStage: 3,
   maxStrokesPerCharacter: 3000,
   maxSteps: 8,
-  maxEffects: 3,
   durationMs: { min: 100, max: 8000 },
   delayMs: { max: 4000 },
   loop: { max: 20 },
@@ -151,5 +177,5 @@ export const LIMITS = {
   scale: { min: 0.5, max: 2 },
 } as const;
 
-export const DEFAULT_SCENE: Scene = { place: null, time: null, weather: null, effects: [] };
+export const DEFAULT_SCENE: Scene = { place: null, time: null, weather: null };
 export const DEFAULT_TOOL: ToolState = { tool: "fill", color: "red", size: "m" };

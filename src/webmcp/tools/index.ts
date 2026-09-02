@@ -1,5 +1,5 @@
-import { addEffect } from "./add_effect";
 import { applyMotion } from "./apply_motion";
+import { applyMotions } from "./apply_motions";
 import { arrangeScene } from "./arrange_scene";
 import { getStudioState } from "./get_studio_state";
 import { listMotions } from "./list_motions";
@@ -17,8 +17,8 @@ export const TOOLS: ToolDef[] = [
   pickSketch,
   setTool,
   applyMotion,
+  applyMotions,
   arrangeScene,
-  addEffect,
 ];
 
 export function toolByName(name: string): ToolDef | undefined {

@@ -4,10 +4,12 @@ import {
   colorAnother,
   enterPlay,
   fillRegion,
+  finishPicture,
   pickSketch,
   removeCharacter,
   resetAll,
-  setEffect,
+  selectCharacter,
+  toggleOnStage,
   undo,
 } from "./actions";
 import { getState } from "./store";
@@ -18,6 +20,14 @@ function pickAndColor(sketchId: string, region: string, color = "red") {
   if (!res.ok) throw new Error(res.code);
   fillRegion(region, color);
   return res.character.id;
+}
+
+function finishAll(...sketchIds: string[]): string[] {
+  return sketchIds.map((sketchId) => {
+    const id = pickAndColor(sketchId, "body");
+    finishPicture();
+    return id;
+  });
 }
 
 beforeEach(() => resetAll());
@@ -39,12 +49,10 @@ describe("pickSketch", () => {
     expect(res.ok && !res.replaced).toBe(true);
     expect(getState().characters).toHaveLength(2);
   });
-  it("refuses a fifth picture when four are colored", () => {
-    pickAndColor("cat", "head");
-    pickAndColor("fish", "body");
-    pickAndColor("bird", "body");
-    pickAndColor("robot", "body");
+  it("refuses a 21st picture when twenty are colored", () => {
+    for (let i = 0; i < 20; i += 1) pickAndColor("cat", "head");
     expect(pickSketch("rocket")).toEqual({ ok: false, code: "tray_full" });
+    expect(getState().characters).toHaveLength(20);
   });
   it("switches back to color mode when called during play", () => {
     pickAndColor("cat", "head");
@@ -76,6 +84,21 @@ describe("enterPlay", () => {
   });
 });
 
+describe("finishPicture", () => {
+  it("puts a colored picture away and empties the canvas", () => {
+    const id = pickAndColor("cat", "head");
+    expect(finishPicture()).toEqual({ ok: true, saved: id });
+    expect(getState().mode).toBe("color");
+    expect(getState().activeCharacterId).toBeNull();
+    expect(getState().characters).toHaveLength(1);
+  });
+  it("refuses a blank picture", () => {
+    const res = pickSketch("cat");
+    expect(finishPicture()).toEqual({ ok: false, code: "not_colored_yet" });
+    expect(getState().activeCharacterId).toBe(res.ok ? res.character.id : null);
+  });
+});
+
 describe("colorAnother", () => {
   it("keeps a colored active picture and empties the canvas", () => {
     const id = pickAndColor("cat", "head");
@@ -95,6 +118,7 @@ describe("auto layout", () => {
     pickAndColor("fish", "body");
     arrangeScene({ placements: [{ characterId: a, position: { x: 0.5, y: 0.5 } }] });
     pickAndColor("bird", "body");
+    enterPlay();
     const chars = getState().characters;
     expect(chars.find((c) => c.id === a)).toMatchObject({
       placement: "manual",
@@ -102,18 +126,6 @@ describe("auto layout", () => {
     });
     const autos = chars.filter((c) => c.placement === "auto").map((c) => c.position.x);
     expect(autos).toEqual([0.35, 0.65]);
-  });
-});
-
-describe("effects", () => {
-  it("caps at three and updates intensity on repeat", () => {
-    expect(setEffect("stars").ok).toBe(true);
-    expect(setEffect("hearts", true, "light", "c_x").ok).toBe(true);
-    expect(setEffect("hearts", true, "heavy", "c_y").ok).toBe(true);
-    expect(setEffect("bubbles")).toEqual({ ok: false, code: "too_many_effects" });
-    const again = setEffect("hearts", true, "heavy", "c_x");
-    expect(again.ok && again.updated).toBe(true);
-    expect(setEffect("none").ok && getState().scene.effects).toHaveLength(0);
   });
 });
 
@@ -128,9 +140,62 @@ describe("undo", () => {
 
 describe("removeCharacter", () => {
   it("re-lays out the rest", () => {
-    const a = pickAndColor("cat", "head");
-    pickAndColor("fish", "body");
+    const [a] = finishAll("cat", "fish");
+    enterPlay();
+    expect(getState().characters.map((c) => c.position.x)).toEqual([0.35, 0.65]);
     removeCharacter(a);
     expect(getState().characters.map((c) => c.position.x)).toEqual([0.5]);
+    expect(getState().cast).toHaveLength(1);
+  });
+});
+
+describe("selectCharacter", () => {
+  it("drops a blank picture left on the canvas", () => {
+    const [a] = finishAll("cat");
+    pickSketch("fish");
+    expect(selectCharacter(a)).toBe(true);
+    expect(getState().characters.map((c) => c.sketchId)).toEqual(["cat"]);
+    expect(getState().activeCharacterId).toBe(a);
+  });
+  it("puts a colored picture away before switching", () => {
+    const [a] = finishAll("cat");
+    const b = pickAndColor("fish", "body");
+    selectCharacter(a);
+    expect(getState().characters).toHaveLength(2);
+    expect(getState().cast).toEqual([a, b]);
+  });
+});
+
+describe("play screen", () => {
+  it("has the newest three friends on it by default", () => {
+    const ids = finishAll("cat", "fish", "bird", "robot");
+    expect(getState().cast).toEqual(ids.slice(1));
+    enterPlay();
+    expect(getState().cast).toEqual(ids.slice(1));
+    const onStage = getState().characters.filter((c) => getState().cast.includes(c.id));
+    expect(onStage.map((c) => c.position.x)).toEqual([0.2, 0.5, 0.8]);
+  });
+  it("lets the longest-standing friend step off when a fourth steps on", () => {
+    const [a, , c, d] = finishAll("cat", "fish", "bird", "robot");
+    expect(toggleOnStage(a)).toBe(true);
+    expect(getState().cast).toEqual([c, d, a]);
+    expect(toggleOnStage(d)).toBe(false);
+    expect(getState().cast).toEqual([c, a]);
+    expect(toggleOnStage("nobody")).toBeNull();
+  });
+  it("refills an empty play screen with the newest friends on play", () => {
+    const [a, b] = finishAll("cat", "fish");
+    toggleOnStage(a);
+    toggleOnStage(b);
+    expect(getState().cast).toEqual([]);
+    enterPlay();
+    expect(getState().cast).toEqual([a, b]);
+  });
+  it("brings a placed friend on stage", () => {
+    const [a, , , d] = finishAll("cat", "fish", "bird", "robot");
+    arrangeScene({ placements: [{ characterId: a, position: { x: 0.1, y: 0.7 } }] });
+    expect(getState().cast).toContain(a);
+    expect(getState().cast).toContain(d);
+    expect(getState().cast).toHaveLength(3);
   });
 });

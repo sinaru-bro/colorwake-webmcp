@@ -26,7 +26,7 @@ export const SetToolInput = z.strictObject({
   color: z
     .string()
     .optional()
-    .describe('Palette id like "red" or "sky"; other names/hex are mapped to the nearest palette color'),
+    .describe('Palette id like "red" or "sky", a CSS color name, or #rrggbb for a color outside the palette'),
   size: z.enum(["s", "m", "l"]).optional().describe("Stroke size for pen/brush/pencil"),
 });
 
@@ -43,14 +43,39 @@ export const ApplyMotionInput = z.strictObject({
   character: z
     .string()
     .describe("Character id from get_studio_state (or the sketch id if only one such character)"),
-  motion: z.string().optional().describe('Preset id from list_motions, or "stop"'),
+  motion: z.string().optional().describe('Preset or place action id from list_motions, or "stop"'),
+  variant: z
+    .string()
+    .optional()
+    .describe("Which version of the preset (ids from list_motions); omit to let the app vary it"),
   steps: z.array(StepInput).min(1).max(8).optional().describe("Custom motion; used when motion is omitted"),
   mode: z.enum(["sequence", "parallel"]).optional().describe("How steps combine; default parallel"),
   speed: z.number().optional().describe("0.5-2, default 1"),
   loop: z
     .union([z.boolean(), z.number().int()])
     .optional()
-    .describe("true = until stopped, number = times; default from preset"),
+    .describe(
+      'true = until stopped ("keep going"), number = times; omit = preset default (looping presets run a few seconds, then end)',
+    ),
+});
+
+export const ApplyMotionsInput = z.strictObject({
+  actions: z
+    .array(
+      z.strictObject({
+        character: z.string().describe("Character id (or sketch id if only one such character)"),
+        motion: z.string().describe('Preset or place action id from list_motions, or "stop"'),
+        variant: z.string().optional().describe("Which version of the preset; omit to let the app vary it"),
+        speed: z.number().optional().describe("0.5-2, default 1"),
+        loop: z
+          .union([z.boolean(), z.number().int()])
+          .optional()
+          .describe("true = until stopped, number = times; omit = preset default"),
+      }),
+    )
+    .min(1)
+    .max(3)
+    .describe("One entry per friend, up to the three on stage"),
 });
 
 export const PlacementInput = z.strictObject({
@@ -67,13 +92,6 @@ export const ArrangeSceneInput = z.strictObject({
   time: z.enum(["day", "night"]).optional(),
   weather: z.string().optional().describe("Weather id from list_motions, e.g. clear, rain, snow, cloudy"),
   placements: z.array(PlacementInput).max(4).optional(),
-});
-
-export const AddEffectInput = z.strictObject({
-  effect: z.string().describe('stars | hearts | bubbles, or "none" to clear all'),
-  on: z.boolean().optional().describe("Default true; false removes this effect"),
-  intensity: z.enum(["light", "normal", "heavy"]).optional().describe("Default normal"),
-  character: z.string().optional().describe("hearts/bubbles only: attach to one character"),
 });
 
 export function toInputSchema(schema: z.ZodType): Record<string, unknown> {

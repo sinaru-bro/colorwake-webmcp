@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { paletteColor } from "../content/palette";
 import { STROKE_PRESETS } from "../content/strokes";
+import { colorHex } from "../lib/color";
 import { pathFromPoints, simplify, toViewBoxPoint } from "../lib/geometry";
 import { newId } from "../lib/ids";
 import type { Paint, Sketch, Stroke, ToolState } from "../state/types";
@@ -8,10 +8,17 @@ import { cloneSketchSvg } from "./loader";
 
 const UNPAINTED = "#FFFFFF";
 const SIMPLIFY_TOLERANCE = 1;
+const SOFT_MARGIN = 3;
+const NS = "http://www.w3.org/2000/svg";
 
 interface RegionRefs {
   path: SVGPathElement;
   strokes: SVGGElement;
+}
+
+interface StrokeNode {
+  node: SVGElement;
+  update(points: number[]): void;
 }
 
 interface Props {
@@ -24,8 +31,8 @@ interface Props {
   className?: string;
 }
 
-function hexOf(colorId: string): string {
-  return paletteColor(colorId)?.hex ?? UNPAINTED;
+function hexOf(color: string): string {
+  return colorHex(color) ?? UNPAINTED;
 }
 
 function rewriteIds(svg: SVGSVGElement, prefix: string): void {
@@ -41,25 +48,60 @@ function rewriteIds(svg: SVGSVGElement, prefix: string): void {
   }
 }
 
-function strokeElement(stroke: Omit<Stroke, "id">, filterId: string): SVGPathElement {
+/**
+ * A soft stroke blurs through its own filter whose region follows the stroke in user space;
+ * the default bounding-box region collapses on straight or single-point strokes.
+ */
+function strokeNode(stroke: Omit<Stroke, "id">, key: string): StrokeNode {
   const preset = STROKE_PRESETS[stroke.tool][stroke.size];
-  const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  el.setAttribute("d", pathFromPoints(stroke.points));
-  el.setAttribute("fill", "none");
-  el.setAttribute("stroke", hexOf(stroke.color));
-  el.setAttribute("stroke-width", String(preset.width));
-  el.setAttribute("stroke-opacity", String(preset.opacity));
-  el.setAttribute("stroke-linecap", "round");
-  el.setAttribute("stroke-linejoin", "round");
-  if (preset.dash) el.setAttribute("stroke-dasharray", preset.dash);
-  if (preset.blur) el.setAttribute("filter", `url(#${filterId})`);
-  return el;
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", hexOf(stroke.color));
+  path.setAttribute("stroke-width", String(preset.width));
+  path.setAttribute("stroke-opacity", String(preset.opacity));
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  if (preset.dash) path.setAttribute("stroke-dasharray", preset.dash);
+  if (!preset.blur) {
+    path.setAttribute("d", pathFromPoints(stroke.points));
+    return { node: path, update: (points) => path.setAttribute("d", pathFromPoints(points)) };
+  }
+  const group = document.createElementNS(NS, "g");
+  const filter = document.createElementNS(NS, "filter");
+  filter.id = key;
+  filter.setAttribute("filterUnits", "userSpaceOnUse");
+  const blur = document.createElementNS(NS, "feGaussianBlur");
+  blur.setAttribute("stdDeviation", String(preset.blur));
+  filter.append(blur);
+  path.setAttribute("filter", `url(#${key})`);
+  group.append(filter, path);
+  const pad = preset.width / 2 + preset.blur * 3 + SOFT_MARGIN;
+  const update = (points: number[]) => {
+    path.setAttribute("d", pathFromPoints(points));
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (let i = 0; i + 1 < points.length; i += 2) {
+      minX = Math.min(minX, points[i]);
+      maxX = Math.max(maxX, points[i]);
+      minY = Math.min(minY, points[i + 1]);
+      maxY = Math.max(maxY, points[i + 1]);
+    }
+    if (minX === Infinity) return;
+    filter.setAttribute("x", (minX - pad).toFixed(1));
+    filter.setAttribute("y", (minY - pad).toFixed(1));
+    filter.setAttribute("width", (maxX - minX + pad * 2).toFixed(1));
+    filter.setAttribute("height", (maxY - minY + pad * 2).toFixed(1));
+  };
+  update(stroke.points);
+  return { node: group, update };
 }
 
 function mountInstance(
   sketch: Sketch,
   prefix: string,
-): { svg: SVGSVGElement; regions: Map<string, RegionRefs>; filterId: string } {
+): { svg: SVGSVGElement; regions: Map<string, RegionRefs> } {
   const svg = cloneSketchSvg(sketch);
   rewriteIds(svg, prefix);
   svg.removeAttribute("width");
@@ -67,26 +109,18 @@ function mountInstance(
   svg.style.width = "100%";
   svg.style.height = "100%";
   svg.style.display = "block";
-  const ns = "http://www.w3.org/2000/svg";
-  const defs = document.createElementNS(ns, "defs");
+  const defs = document.createElementNS(NS, "defs");
   svg.prepend(defs);
-  const filterId = `${prefix}-soft`;
-  const filter = document.createElementNS(ns, "filter");
-  filter.id = filterId;
-  const blur = document.createElementNS(ns, "feGaussianBlur");
-  blur.setAttribute("stdDeviation", "0.8");
-  filter.append(blur);
-  defs.append(filter);
   const regions = new Map<string, RegionRefs>();
   for (const path of svg.querySelectorAll<SVGPathElement>("path[data-region]")) {
     const id = path.dataset.region ?? "";
-    const clip = document.createElementNS(ns, "clipPath");
+    const clip = document.createElementNS(NS, "clipPath");
     clip.id = `${prefix}-clip-${id}`;
-    const clipShape = document.createElementNS(ns, "path");
+    const clipShape = document.createElementNS(NS, "path");
     clipShape.setAttribute("d", path.getAttribute("d") ?? "");
     clip.append(clipShape);
     defs.append(clip);
-    const strokes = document.createElementNS(ns, "g");
+    const strokes = document.createElementNS(NS, "g");
     strokes.dataset.strokes = id;
     strokes.setAttribute("clip-path", `url(#${clip.id})`);
     strokes.style.pointerEvents = "none";
@@ -94,7 +128,7 @@ function mountInstance(
     path.setAttribute("fill", UNPAINTED);
     regions.set(id, { path, strokes });
   }
-  return { svg, regions, filterId };
+  return { svg, regions };
 }
 
 export function SketchSurface({
@@ -135,9 +169,9 @@ export function SketchSurface({
     }
     for (const stroke of paint.strokes) {
       const refs = inst.regions.get(stroke.region);
-      if (refs) refs.strokes.append(strokeElement(stroke, inst.filterId));
+      if (refs) refs.strokes.append(strokeNode(stroke, `${prefix}-${stroke.id}`).node);
     }
-  }, [paint, sketch]);
+  }, [paint, sketch, prefix]);
 
   useEffect(() => {
     const el = host.current;
@@ -145,14 +179,14 @@ export function SketchSurface({
     let drawing: {
       region: string;
       points: number[];
-      preview: SVGPathElement;
+      preview: StrokeNode;
       tool: Exclude<ToolState["tool"], "fill">;
     } | null = null;
     let frame = 0;
 
     const flush = () => {
       frame = 0;
-      if (drawing) drawing.preview.setAttribute("d", pathFromPoints(drawing.points));
+      if (drawing) drawing.preview.update(drawing.points);
     };
 
     const onDown = (e: PointerEvent) => {
@@ -176,8 +210,8 @@ export function SketchSurface({
         size: current.tool.size,
         points: [p.x, p.y],
       };
-      const preview = strokeElement(stroke, inst.filterId);
-      refs.strokes.append(preview);
+      const preview = strokeNode(stroke, `${prefix}-draw`);
+      refs.strokes.append(preview.node);
       drawing = { region, points: stroke.points, preview, tool: current.tool.tool };
       el.setPointerCapture(e.pointerId);
       e.preventDefault();
@@ -200,7 +234,7 @@ export function SketchSurface({
       let points = drawing.points;
       if (points.length === 2) points = [points[0], points[1], points[0] + 0.01, points[1] + 0.01];
       points = simplify(points, SIMPLIFY_TOLERANCE);
-      preview.remove();
+      preview.node.remove();
       const current = live.current;
       drawing = null;
       if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
@@ -225,7 +259,7 @@ export function SketchSurface({
       el.removeEventListener("pointercancel", finish);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [interactive]);
+  }, [interactive, prefix]);
 
   return (
     <div

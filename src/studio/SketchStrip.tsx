@@ -7,14 +7,11 @@ import { LIMITS, type Paint } from "../state/types";
 import { ui } from "../state/ui";
 
 const EMPTY_PAINT: Paint = { fills: {}, strokes: [] };
-const GROUP_LABELS: Record<string, string> = {
-  quadruped: "Runs",
-  swimmer: "Swims",
-  winged: "Flies",
-  biped: "Walks",
-  object: "Things",
-};
-export const TRAY_FULL_MESSAGE = "Tray is full — hold a picture in the tray to remove it";
+const FULL_NOTICE = {
+  title: "My friends is full!",
+  hint: "Hold a picture there to make room",
+  at: "friends",
+} as const;
 
 export function SketchStrip() {
   const mode = useStudio((s) => s.mode);
@@ -29,7 +26,6 @@ export function SketchStrip() {
         if (sketches.length === 0) return null;
         return (
           <div key={rig.id} className="strip__group">
-            <span className="strip__label">{GROUP_LABELS[rig.id] ?? rig.label}</span>
             <div className="strip__cards">
               {sketches.map((sketch) => (
                 <button
@@ -38,7 +34,7 @@ export function SketchStrip() {
                   className={`card${activeSketch === sketch.id ? " card--on" : ""}${full ? " card--dim" : ""}`}
                   onClick={() => {
                     const res = pickSketch(sketch.id);
-                    if (!res.ok && res.code === "tray_full") ui.toast(TRAY_FULL_MESSAGE);
+                    if (!res.ok && res.code === "tray_full") ui.notice(FULL_NOTICE);
                   }}
                   aria-label={sketch.title}
                 >

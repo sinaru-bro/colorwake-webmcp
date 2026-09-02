@@ -1,19 +1,20 @@
 import { PLACES, WEATHERS } from "../../content/scenes";
+import { actionsAt } from "../../content/scenes/actions";
 import { arrangeScene as arrange, type Placement } from "../../state/actions";
 import { nearestAnchor, nextQuestion } from "../../state/selectors";
 import { getState } from "../../state/store";
-import { uiStore } from "../../state/ui";
 import { ANCHORS, type Anchor, type PlaceId, type WeatherId } from "../../state/types";
 import { summarize } from "../describe";
 import { fail, ok } from "../results";
 import { ArrangeSceneInput } from "../schemas";
+import { leaveProps } from "./apply_motion";
 import { clampNumber, defineTool, ensurePlayMode, parseInput, resolveCharacter } from "./shared";
 
 export const arrangeScene = defineTool({
   name: "arrange_scene",
   title: "Set the scene",
   description:
-    'Compose the play screen: choose the place (home, sea, sky …), day or night, the weather (clear, rain, snow, cloudy …) and where colored pictures stand (left, center, right, sky or exact x/y). Use when the child answers "where are we? day or night? what\'s the weather?" or wants characters to go somewhere or meet. Anything goes — a fish on land is fine. Only what you pass changes; nextQuestion in the result is what to ask next. Does not change colors or motions.',
+    'Compose the play screen: the place (home, sea, sky …), day or night, the weather (clear, rain, snow …) and where colored pictures stand (left, center, right, sky or exact x/y) — placing one brings it on stage. Use when the child answers "where are we? day or night? what\'s the weather?" or wants characters to go somewhere or meet. Anything goes — a fish on land is fine. Only what you pass changes; nextQuestion is what to ask next. Does not change colors or motions.',
   schema: ArrangeSceneInput,
   execute(input) {
     const parsed = parseInput(ArrangeSceneInput, input);
@@ -55,14 +56,21 @@ export const arrangeScene = defineTool({
       weather: weather as WeatherId | undefined,
       placements: resolvedPlacements,
     });
-    const characters = getState().characters.map((c) => ({
+    leaveProps(
+      scene.place,
+      resolvedPlacements.map((p) => p.characterId),
+    );
+    const state = getState();
+    const characters = state.characters.map((c) => ({
       ...summarize(c),
       position: c.position,
       anchor: nearestAnchor(c.position),
+      onStage: state.cast.includes(c.id),
     }));
     return ok({
       scene: { place: scene.place, time: scene.time, weather: scene.weather },
-      nextQuestion: nextQuestion(scene, uiStore.getState().skipped),
+      nextQuestion: nextQuestion(scene),
+      placeActions: actionsAt(scene.place).map((a) => a.id),
       characters,
       clamped: Object.keys(clamped).length ? clamped : null,
       switchedTo: switched.switchedTo,

@@ -1,9 +1,12 @@
-import { PALETTE, type PaletteColor } from "../content/palette";
+import { PALETTE, paletteColor } from "../content/palette";
 
 export interface ColorMatch {
-  id: string;
+  /** Palette id, or a lowercase #rrggbb for a color outside the palette. */
+  color: string;
   mapped: { from: string; to: string } | null;
 }
+
+const HEX = /^#[0-9a-f]{6}$/i;
 
 const CSS_NAMES: Record<string, string> = {
   red: "#ff0000",
@@ -31,46 +34,61 @@ const CSS_NAMES: Record<string, string> = {
   salmon: "#fa8072",
   tan: "#d2b48c",
   silver: "#c0c0c0",
+  turquoise: "#40e0d0",
+  coral: "#ff7f50",
+  hotpink: "#ff69b4",
+  mint: "#98ff98",
+  olive: "#808000",
+  maroon: "#800000",
+  indigo: "#4b0082",
+  lavender: "#e6e6fa",
 };
 
-function parseHex(input: string): [number, number, number] | null {
+function normalizeHex(input: string): string | null {
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(input.trim());
   if (!m) return null;
-  let h = m[1];
+  let h = m[1].toLowerCase();
   if (h.length === 3)
     h = h
       .split("")
       .map((c) => c + c)
       .join("");
-  const n = parseInt(h, 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  return `#${h}`;
 }
 
-function nearest(rgb: [number, number, number]): PaletteColor {
-  let best = PALETTE[0];
-  let bestD = Infinity;
-  for (const c of PALETTE) {
-    const p = parseHex(c.hex)!;
-    const d = (p[0] - rgb[0]) ** 2 + (p[1] - rgb[1]) ** 2 + (p[2] - rgb[2]) ** 2;
-    if (d < bestD) {
-      bestD = d;
-      best = c;
-    }
-  }
-  return best;
+/** True for a color outside the palette, stored as #rrggbb. */
+export function isCustomColor(color: string): boolean {
+  return HEX.test(color);
+}
+
+/** CSS hex for a palette id or custom color; undefined when neither. */
+export function colorHex(color: string): string | undefined {
+  return paletteColor(color)?.hex ?? (HEX.test(color) ? color : undefined);
+}
+
+/** Text luminance helper: dark ink reads better on light colors. */
+export function isLightColor(hex: string): boolean {
+  const h = normalizeHex(hex);
+  if (!h) return false;
+  const n = parseInt(h.slice(1), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62;
 }
 
 export function resolveColor(input: string): ColorMatch | null {
   const key = input.trim().toLowerCase();
   if (!key) return null;
   const exact = PALETTE.find((c) => c.id === key || c.label.toLowerCase() === key);
-  if (exact) return { id: exact.id, mapped: null };
+  if (exact) return { color: exact.id, mapped: null };
   const alias = PALETTE.find((c) => c.aliases.includes(key));
-  if (alias) return { id: alias.id, mapped: { from: input, to: alias.id } };
-  const rgb =
-    parseHex(key) ??
-    (CSS_NAMES[key.replace(/\s+/g, "")] ? parseHex(CSS_NAMES[key.replace(/\s+/g, "")]) : null);
-  if (!rgb) return null;
-  const n = nearest(rgb);
-  return { id: n.id, mapped: { from: input, to: n.id } };
+  if (alias) return { color: alias.id, mapped: { from: input, to: alias.id } };
+  const hex = normalizeHex(key);
+  if (hex) {
+    const same = PALETTE.find((c) => c.hex.toLowerCase() === hex);
+    return same ? { color: same.id, mapped: { from: input, to: same.id } } : { color: hex, mapped: null };
+  }
+  const named = CSS_NAMES[key.replace(/\s+/g, "")];
+  return named ? { color: named, mapped: { from: input, to: named } } : null;
 }

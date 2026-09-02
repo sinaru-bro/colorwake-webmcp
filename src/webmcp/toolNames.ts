@@ -6,8 +6,8 @@ export const TOOL_NAMES = [
   "pick_sketch",
   "set_tool",
   "apply_motion",
+  "apply_motions",
   "arrange_scene",
-  "add_effect",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];

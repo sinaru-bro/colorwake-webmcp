@@ -46,6 +46,32 @@ export const PLACES: PlaceDef[] = [
     elements: ["three cloud tops on the horizon", "four distant clouds", "rainbow (day only)"],
   },
   {
+    id: "beach",
+    label: "Beach",
+    sayings: ["seaside", "sand", "sandcastle", "seashore"],
+    horizon: HORIZON,
+    elements: [
+      "sea to the horizon with a sailboat and an island",
+      "wet sand with lapping foam",
+      "palm tree",
+      "sandcastle",
+      "umbrella and towel",
+      "crab",
+    ],
+  },
+  {
+    id: "river",
+    label: "River",
+    sayings: ["stream", "valley", "bridge", "creek", "waterfall"],
+    horizon: HORIZON,
+    elements: [
+      "valley hills with a waterfall",
+      "wooden bridge to stand on",
+      "flowing water with ducks",
+      "reeds",
+    ],
+  },
+  {
     id: "playground",
     label: "Playground",
     sayings: ["slide", "swings", "jungle gym"],
@@ -65,6 +91,40 @@ export const PLACES: PlaceDef[] = [
     sayings: ["hills", "hiking", "forest"],
     horizon: HORIZON,
     elements: ["two mountain layers (back)", "three trees", "trail"],
+  },
+  {
+    id: "dino",
+    label: "Dinosaurs",
+    sayings: ["dinosaur", "dino land", "jurassic", "long ago", "volcano"],
+    horizon: HORIZON,
+    elements: [
+      "volcano with smoke",
+      "mesa",
+      "palms and ferns",
+      "nest with spotted eggs",
+      "footprints",
+      "pterosaur gliding",
+    ],
+  },
+  {
+    id: "space",
+    label: "Space",
+    sayings: ["outer space", "moon", "planets", "stars", "galaxy"],
+    horizon: HORIZON,
+    elements: ["deep space with stars", "ringed planet", "Earth", "UFO", "moon ground with craters", "flag"],
+  },
+  {
+    id: "school",
+    label: "School",
+    sayings: ["preschool", "kindergarten", "daycare", "classroom", "school bus"],
+    horizon: HORIZON,
+    elements: [
+      "school building with colorful windows and a sun sign",
+      "flag",
+      "school bus",
+      "hopscotch path",
+      "tree",
+    ],
   },
 ];
 

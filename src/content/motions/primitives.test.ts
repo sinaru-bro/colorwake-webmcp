@@ -23,10 +23,10 @@ describe("partClass", () => {
 
 describe("clampParams", () => {
   it("clamps whole-actor ranges and reports them", () => {
-    const r = clampParams("move", { dx: 900, dy: -50 }, whole);
-    expect(r.params.dx).toBe(400);
+    const r = clampParams("move", { dx: 2000, dy: -50 }, whole);
+    expect(r.params.dx).toBe(1200);
     expect(r.params.dy).toBe(-50);
-    expect(r.clamped).toEqual({ dx: 400 });
+    expect(r.clamped).toEqual({ dx: 1200 });
   });
   it("uses tighter part ranges", () => {
     const r = clampParams("move", { dx: 300 }, part("tail"));
@@ -90,12 +90,44 @@ describe("build", () => {
     const step = PRIMITIVES.move.build(params, whole);
     expect(step.holds).toBe(true);
     expect(step.options.fill).toBe("forwards");
-    expect(step.frames[step.frames.length - 1]).toEqual({ tx: 0, ty: -200 });
+    expect(step.frames[step.frames.length - 1]).toMatchObject({ tx: 0, ty: -200 });
   });
   it("lifts the arc midpoint against the travel direction", () => {
     const { params } = clampParams("move", { dx: 100, dy: 0, path: "arc" }, whole);
     const step = PRIMITIVES.move.build(params, whole);
-    expect(step.frames[1]).toEqual({ tx: 50, ty: -30 });
+    expect(step.frames[1]).toMatchObject({ tx: 50, ty: -30 });
+  });
+  it("eases every segment of multi-segment steps and runs them linearly", () => {
+    const { params } = clampParams("rotate", {}, whole);
+    const step = PRIMITIVES.rotate.build(params, whole);
+    expect(step.options.easing).toBe("linear");
+    expect(step.keyframes[0].easing).toBe("ease-in-out");
+    const hold = PRIMITIVES.move.build(clampParams("move", { dx: 100, hold: true }, whole).params, whole);
+    expect(hold.options.easing).toBeUndefined();
+    expect(hold.keyframes[0].easing).toBeUndefined();
+  });
+  it("scales bounce squash down for small hops", () => {
+    const hop = PRIMITIVES.bounce.build(
+      clampParams("bounce", { height: 4, squash: 0.2 }, whole).params,
+      whole,
+    );
+    const land = hop.frames.find((f) => f.offset === 0.88)!;
+    expect(land.sx).toBeCloseTo(1.02);
+    const jump = PRIMITIVES.bounce.build(
+      clampParams("bounce", { height: 120, squash: 0.2 }, whole).params,
+      whole,
+    );
+    expect(jump.frames.find((f) => f.offset === 0.88)!.sx).toBeCloseTo(1.2);
+    expect(jump.frames.find((f) => f.offset === 0.5)!.ty).toBe(-120);
+  });
+  it("pivots spin and flip at the body centre when a centre offset is given", () => {
+    const spin = PRIMITIVES.spin.build(clampParams("spin", {}, whole).params, whole);
+    const kf = toKeyframes(spin.frames, 0.5, 60);
+    expect(kf[1].transform).toBe(
+      "translate(0.00px, 0.00px) translate(0px, -60.00px) rotate(360deg) scale(1, 1) translate(0px, 60.00px)",
+    );
+    const tilt = toKeyframes([{ rotate: 10 }], 0.5, 60);
+    expect(tilt[0].transform).toContain("translate(0px, 0.00px) rotate(10deg)");
   });
   it("scales translation when converting to keyframes", () => {
     const kf = toKeyframes([{ tx: 100, ty: -50, rotate: 10 }], 0.5);
@@ -104,6 +136,6 @@ describe("build", () => {
   it("describes every primitive for list_motions", () => {
     const d = describePrimitives();
     expect(d.map((x) => x.id)).toEqual(ids);
-    expect(d.find((x) => x.id === "move")?.params.dx).toContain("[-400,400]");
+    expect(d.find((x) => x.id === "move")?.params.dx).toContain("[-1200,1200]");
   });
 });

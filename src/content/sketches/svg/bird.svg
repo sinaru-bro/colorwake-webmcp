@@ -6,10 +6,7 @@
     <path data-region="wing-r" d="M250 246 C300 176 400 176 402 262 C360 250 300 250 250 246 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
   <g data-part="body" data-pivot="256 300">
-    <g data-outline="true">
-      <path d="M222 380 L216 404 M290 380 L296 404" fill="none" stroke="#2B2B2B" stroke-width="6" stroke-linecap="round"/>
-    </g>
-    <path data-region="feet" d="M158 420 L182 386 L256 402 L330 386 L354 420 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="feet" d="M208 370 L224 370 L224 404 L238 404 C244 404 248 408 248 412 C248 416 244 420 238 420 L190 420 C182 420 178 414 180 410 C182 406 186 404 192 404 L208 404 Z M290 370 L306 370 L306 404 L320 404 C326 404 330 408 330 412 C330 416 326 420 320 420 L272 420 C264 420 260 414 262 410 C264 406 268 404 274 404 L290 404 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
     <path data-region="body" d="M136 300 C136 254 190 216 256 216 C322 216 376 254 376 300 C376 346 322 386 256 386 C190 386 136 346 136 300 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
     <path data-region="belly" d="M176 336 C200 372 312 372 336 336 C312 354 200 354 176 336 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
   </g>

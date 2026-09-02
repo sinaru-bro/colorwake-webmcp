@@ -8,25 +8,46 @@ import { ui } from "./state/ui";
 import { engine } from "./play/engine";
 import { setEngine } from "./webmcp/engineBridge";
 import { registerAll } from "./webmcp/register";
-import { seedDemo } from "./app/devSeed";
+import { parseSeedScene, seedDemo } from "./app/devSeed";
+import { installTransitionTrigger } from "./app/flight";
 import { callTool } from "./webmcp/devPanel";
 
 const params = new URLSearchParams(window.location.search);
 const seed = import.meta.env.DEV && params.get("dev") === "1" ? params.get("seed") : null;
+if (import.meta.env.DEV && params.get("dev") === "1")
+  Object.assign(window, { colorwakeDev: { callTool, engine } });
 const saved = seed ? null : loadSaved();
 if (saved) {
   hydrate(saved);
   if (saved.characters.length > 0) ui.setResumePending(true);
 }
-if (seed) seedDemo(seed === "play", params.get("scene") !== "0");
+if (seed) seedDemo(seed === "play" || seed === "all", parseSeedScene(params.get("scene")), seed === "all");
 const motion = seed ? params.get("motion") : null;
-if (motion) setTimeout(() => void callTool("apply_motion", { character: "cat", motion }), 400);
+if (motion) {
+  for (const item of motion.split(",")) {
+    const [a, b] = item.split(":");
+    const character = b ? a : "cat";
+    const [motion, variant] = (b ?? a).split(".");
+    setTimeout(
+      () => void callTool("apply_motion", { character, motion, ...(variant ? { variant } : {}) }),
+      400,
+    );
+  }
+}
+const fly = seed ? params.get("fly") : null;
+if (fly) setTimeout(() => void callTool("set_mode", { mode: "play" }), Number(fly) || 400);
 startAutosave();
 setEngine(engine);
 
 const controller = new AbortController();
 void registerAll(controller.signal);
-if (import.meta.hot) import.meta.hot.dispose(() => controller.abort());
+const uninstallTransition = installTransitionTrigger();
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    controller.abort();
+    uninstallTransition();
+  });
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

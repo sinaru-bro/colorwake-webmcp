@@ -35,7 +35,6 @@ Deploys the static build to Cloudflare Workers Static Assets.
 | `set_tool`         | write | Change brush and color (never paints)                                       |
 | `apply_motion`     | write | Animate a character with a preset or composed steps                         |
 | `arrange_scene`    | write | Place, time, weather and character positions                                |
-| `add_effect`       | write | Stars, hearts, bubbles                                                      |
 
 ## License
 

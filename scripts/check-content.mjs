@@ -122,7 +122,7 @@ function approxBbox(d) {
 const palette = readFileSync(join(root, "src/content/palette.ts"), "utf8");
 const paletteIds = ids(palette, /\bid: "([a-z-]+)"/g);
 if (new Set(paletteIds).size !== paletteIds.length) error("palette: duplicate ids");
-if (paletteIds.length !== 12) error(`palette: expected 12 colors, found ${paletteIds.length}`);
+if (paletteIds.length !== 11) error(`palette: expected 11 colors, found ${paletteIds.length}`);
 for (const hex of ids(palette, /hex: "(#[0-9A-Fa-f]{6})"/g))
   if (!/^#[0-9A-F]{6}$/.test(hex)) warn(`palette: hex not uppercase ${hex}`);
 const aliases = ids(palette, /aliases: \[([^\]]*)\]/g).flatMap((a) => ids(a, /"([^"]*)"/g));

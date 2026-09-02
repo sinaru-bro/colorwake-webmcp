@@ -8,8 +8,9 @@ export function initialState(): StudioState {
     mode: "color",
     characters: [],
     activeCharacterId: null,
+    cast: [],
     tool: { ...DEFAULT_TOOL },
-    scene: { ...DEFAULT_SCENE, effects: [] },
+    scene: { ...DEFAULT_SCENE },
     updatedAt: Date.now(),
   };
 }

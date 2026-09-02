@@ -1,6 +1,7 @@
 import { sketchById } from "../content/sketches/catalog";
+import { isColored } from "./selectors";
 import { studioStore } from "./store";
-import type { StudioState } from "./types";
+import { LIMITS, type StudioState } from "./types";
 import { ui } from "./ui";
 
 export const STORAGE_KEY = "colorwake:studio:v1";
@@ -31,6 +32,13 @@ export function parseSaved(raw: string | null): StudioState | null {
     typeof data.activeCharacterId === "string" && characters.some((c) => c.id === data.activeCharacterId)
       ? data.activeCharacterId
       : null;
+  const ids = new Set(characters.map((c) => c.id));
+  const cast = Array.isArray(data.cast)
+    ? data.cast.filter((id): id is string => typeof id === "string" && ids.has(id)).slice(-LIMITS.maxOnStage)
+    : characters
+        .filter(isColored)
+        .slice(-LIMITS.maxOnStage)
+        .map((c) => c.id);
   const savedScene = isRecord(data.scene) ? data.scene : null;
   const tool = isRecord(data.tool) ? (data.tool as unknown as StudioState["tool"]) : null;
   if (!savedScene || !tool) return null;
@@ -39,13 +47,13 @@ export function parseSaved(raw: string | null): StudioState | null {
     place: axis(savedScene.place),
     time: axis(savedScene.time),
     weather: axis(savedScene.weather),
-    effects: Array.isArray(savedScene.effects) ? (savedScene.effects as StudioState["scene"]["effects"]) : [],
   };
   return {
     version: 1,
     mode,
     characters,
     activeCharacterId,
+    cast,
     tool,
     scene,
     updatedAt: typeof data.updatedAt === "number" ? data.updatedAt : Date.now(),

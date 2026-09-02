@@ -1,77 +1,45 @@
 import type { Preset } from "../../../state/types";
+import { fade, jumpVariants, lean, many, one, scale, spin } from "./shared";
 
 export const UNIVERSAL_PRESETS: Preset[] = [
-  {
-    id: "fly",
-    rig: "any",
-    label: "Fly",
-    sayings: ["float", "soar", "fly up"],
-    mode: "parallel",
-    loop: true,
-    steps: [
-      { primitive: "move", params: { dy: -120, path: "arc" }, durationMs: 2400 },
-      { primitive: "tilt", params: { angle: 8, side: "both" }, durationMs: 2400 },
-      { primitive: "bounce", params: { height: 6 }, durationMs: 600 },
-    ],
-  },
-  {
-    id: "jump",
-    rig: "any",
-    label: "Jump",
-    sayings: ["hop", "leap", "bounce"],
-    mode: "sequence",
-    loop: false,
-    steps: [
-      { primitive: "scale", params: { from: 1, to: 0.92 }, durationMs: 150, ease: "ease-in" },
-      { primitive: "bounce", params: { height: 120, squash: 0.12 }, durationMs: 720 },
-    ],
-  },
-  {
+  many({ id: "jump", rig: "any", label: "Jump", sayings: ["hop", "leap", "bounce"] }, jumpVariants([])),
+  one({
     id: "spin",
     rig: "any",
     label: "Spin",
     sayings: ["twirl", "turn around", "whirl"],
     mode: "parallel",
-    loop: false,
-    steps: [
-      { primitive: "spin", params: { turns: 1, direction: "cw" }, durationMs: 800 },
-      { primitive: "scale", params: { from: 1, to: 1.1 }, durationMs: 800 },
-    ],
-  },
-  {
+    loop: 2,
+    steps: [{ ...spin(1, 800), params: { turns: 1, direction: "cw" } }, scale(1, 1.1, 800)],
+  }),
+  one({
     id: "wiggle",
     rig: "any",
     label: "Wiggle",
     sayings: ["dance", "shimmy", "jiggle"],
     mode: "parallel",
     loop: true,
-    steps: [
-      { primitive: "rotate", params: { from: -6, to: 6 }, durationMs: 500 },
-      { primitive: "scale", params: { from: 1, to: 1.06 }, durationMs: 500 },
-    ],
-  },
-  {
+    steps: [lean(-6, 6, 500), scale(1, 1.06, 500)],
+  }),
+  one({
     id: "grow",
     rig: "any",
     label: "Grow",
     sayings: ["get bigger", "big", "giant"],
     mode: "sequence",
     loop: false,
-    steps: [{ primitive: "scale", params: { from: 1, to: 1.4 }, durationMs: 900, ease: "ease-in-out" }],
-  },
-  {
+    steps: [{ ...scale(1, 1.4, 900), ease: "ease-in-out" }],
+  }),
+  one({
     id: "hide",
     rig: "any",
     label: "Hide",
     sayings: ["shrink", "peekaboo", "disappear"],
     mode: "parallel",
     loop: false,
-    steps: [
-      { primitive: "fade", params: { to: 0.15 }, durationMs: 700 },
-      { primitive: "scale", params: { from: 1, to: 0.7 }, durationMs: 700 },
-    ],
-  },
-  {
+    steps: [fade(0.15, 700), scale(1, 0.7, 700)],
+  }),
+  one({
     id: "stop",
     rig: "any",
     label: "Stop",
@@ -79,5 +47,5 @@ export const UNIVERSAL_PRESETS: Preset[] = [
     mode: "parallel",
     loop: false,
     steps: [],
-  },
+  }),
 ];

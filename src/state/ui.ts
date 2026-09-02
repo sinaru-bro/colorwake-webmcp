@@ -1,6 +1,6 @@
 import { useStore } from "zustand";
 import { createStore } from "zustand/vanilla";
-import type { Paint, Position, SceneAxis } from "./types";
+import type { Paint, Position } from "./types";
 
 export type AgentSupport = "native" | "none";
 
@@ -14,18 +14,49 @@ export interface Activity {
   at: number;
 }
 
+export interface Rect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/** A finished picture flying from the canvas onto the play screen. */
+export interface Transition {
+  characterId: string;
+  phase: "fly" | "land";
+  paper: Rect;
+  picture: Rect;
+}
+
+/** A short note for the grown-up, e.g. why a tap did nothing; `at` names the panel it points to. */
+export interface Notice {
+  title: string;
+  hint: string;
+  at?: "friends";
+}
+
+/** A finished picture leaving the canvas for its My friends tile, in viewport coordinates. */
+export interface Stash {
+  characterId: string;
+  from: Rect;
+}
+
 export interface UiState {
   undo: Record<string, Paint[]>;
   zoom: { scale: number; pan: Position };
   sidebarOpen: boolean;
-  doneSheetOpen: boolean;
   resumePending: boolean;
   agent: { support: AgentSupport };
   activity: Activity[];
-  skipped: SceneAxis[];
   flash: { keys: string[]; n: number } | null;
+  transition: Transition | null;
+  stash: Stash | null;
+  /** The play screen is giving way to the canvas. */
+  leaving: boolean;
+  mutedActivity: number;
   storageError: boolean;
-  toast: string | null;
+  notice: Notice | null;
   helperPulse: number;
 }
 
@@ -38,14 +69,16 @@ export const uiStore = createStore<UiState>(() => ({
   undo: {},
   zoom: { scale: 1, pan: { x: 0, y: 0 } },
   sidebarOpen: typeof window === "undefined" || window.innerWidth >= 1000,
-  doneSheetOpen: false,
   resumePending: false,
   agent: { support: "none" },
   activity: [],
-  skipped: [],
   flash: null,
+  transition: null,
+  stash: null,
+  leaving: false,
+  mutedActivity: 0,
   storageError: false,
-  toast: null,
+  notice: null,
   helperPulse: 0,
 }));
 
@@ -77,9 +110,6 @@ export const ui = {
   setSidebar(open: boolean): void {
     uiStore.setState({ sidebarOpen: open });
   },
-  setDoneSheet(open: boolean): void {
-    uiStore.setState({ doneSheetOpen: open });
-  },
   setResumePending(pending: boolean): void {
     uiStore.setState({ resumePending: pending });
   },
@@ -92,12 +122,6 @@ export const ui = {
       activity: [...s.activity, { ...entry, id: activitySeq }].slice(-ACTIVITY_DEPTH),
     }));
   },
-  skipQuestion(axis: SceneAxis): void {
-    uiStore.setState((s) => ({ skipped: s.skipped.includes(axis) ? s.skipped : [...s.skipped, axis] }));
-  },
-  clearSkipped(): void {
-    uiStore.setState({ skipped: [] });
-  },
   flash(keys: string[]): void {
     const n = (uiStore.getState().flash?.n ?? 0) + 1;
     uiStore.setState({ flash: { keys, n } });
@@ -105,11 +129,29 @@ export const ui = {
       if (uiStore.getState().flash?.n === n) uiStore.setState({ flash: null });
     }, FLASH_MS);
   },
+  startTransition(t: Omit<Transition, "phase">): void {
+    uiStore.setState({ transition: { ...t, phase: "fly" } });
+  },
+  landTransition(): void {
+    uiStore.setState((s) => (s.transition ? { transition: { ...s.transition, phase: "land" } } : {}));
+  },
+  endTransition(): void {
+    uiStore.setState((s) => ({ transition: null, mutedActivity: s.activity.at(-1)?.id ?? s.mutedActivity }));
+  },
+  setLeaving(leaving: boolean): void {
+    uiStore.setState({ leaving });
+  },
+  startStash(stash: Stash): void {
+    uiStore.setState({ stash });
+  },
+  endStash(): void {
+    uiStore.setState({ stash: null });
+  },
   setStorageError(error: boolean): void {
     uiStore.setState({ storageError: error });
   },
-  toast(message: string | null): void {
-    uiStore.setState({ toast: message });
+  notice(notice: Notice | null): void {
+    uiStore.setState({ notice });
   },
   pulseHelper(): void {
     uiStore.setState((s) => ({ helperPulse: s.helperPulse + 1 }));

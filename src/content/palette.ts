@@ -20,11 +20,10 @@ export const PALETTE: PaletteColor[] = [
   },
   { id: "blue", label: "Blue", hex: "#3E63DD", aliases: ["navy", "royal blue"] },
   { id: "purple", label: "Purple", hex: "#8E4EC6", aliases: ["violet", "lavender"] },
-  { id: "pink", label: "Pink", hex: "#F27DA8", aliases: ["rose", "magenta"] },
-  { id: "brown", label: "Brown", hex: "#A3623D", aliases: ["chocolate", "tan"] },
-  { id: "peach", label: "Peach", hex: "#F9C9A8", aliases: ["skin", "beige", "apricot"] },
-  { id: "black", label: "Black", hex: "#1F1F1F", aliases: ["dark", "charcoal"] },
   { id: "white", label: "White", hex: "#FFFFFF", aliases: ["snow", "ivory"] },
+  { id: "peach", label: "Peach", hex: "#F9C9A8", aliases: ["skin", "beige", "apricot"] },
+  { id: "brown", label: "Brown", hex: "#A3623D", aliases: ["chocolate", "tan"] },
+  { id: "black", label: "Black", hex: "#1F1F1F", aliases: ["dark", "charcoal"] },
 ];
 
 export const PALETTE_IDS: ColorId[] = PALETTE.map((c) => c.id);

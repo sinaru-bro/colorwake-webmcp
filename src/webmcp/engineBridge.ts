@@ -1,4 +1,5 @@
-import type { PlayMode, Step } from "../state/types";
+import type { PlaceAction } from "../content/scenes/actions";
+import type { PlayMode, Pose, Position, Step } from "../state/types";
 
 export type PresetSource = "rig" | "universal" | "other";
 
@@ -6,10 +7,17 @@ export interface EnginePlayRequest {
   characterId: string;
   preset: string | null;
   presetSource: PresetSource | null;
+  variant?: string | null;
   steps: Step[];
   mode: PlayMode;
   speed: number;
-  loop: boolean | number;
+  /** true loops until stopped; "auto" loops for a few seconds, then ends. */
+  loop: boolean | number | "auto";
+  pose?: Pose | null;
+  /** A prop action; `steps` are then its limb moves. */
+  action?: PlaceAction | null;
+  /** Called when a motion ends somewhere new — a path action or a held move — with where the friend now stands. */
+  onSettle?: (position: Position) => void;
 }
 
 export type EnginePlayResult =
@@ -18,6 +26,8 @@ export type EnginePlayResult =
 
 export interface EngineCurrent {
   preset: string | null;
+  variant: string | null;
+  action: string | null;
   loop: boolean;
 }
 
@@ -26,6 +36,8 @@ export interface Engine {
   stop(characterId: string): void;
   stopAll(): void;
   current(characterId: string): EngineCurrent | null;
+  /** The play screen's size in pixels, once it has been laid out. */
+  stageSize(): { w: number; h: number } | null;
 }
 
 const noopEngine: Engine = {
@@ -33,6 +45,7 @@ const noopEngine: Engine = {
   stop: () => undefined,
   stopAll: () => undefined,
   current: () => null,
+  stageSize: () => null,
 };
 
 let engine: Engine = noopEngine;

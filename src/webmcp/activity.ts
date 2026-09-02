@@ -1,10 +1,15 @@
-import { EFFECTS } from "../content/effects";
 import { findPreset } from "../content/motions/presets";
 import { placeById, weatherById } from "../content/scenes";
+import { findAction } from "../content/scenes/actions";
 import { sketchById } from "../content/sketches/catalog";
 import { activeCharacter, displayName, findCharacter } from "../state/selectors";
 import type { Character, StudioState } from "../state/types";
 
+const SHOUT: Partial<Record<string, string>> = {
+  blank: "A plain stage!",
+  space: "Off to space!",
+  school: "Off to school!",
+};
 export interface ActivityNote {
   kid: string | null;
   tag: string;
@@ -75,19 +80,38 @@ export function describeActivity(
       const c = subject(str(args.character), after);
       const name = c ? cap(displayName(c)) : null;
       const motion = str(args.motion);
+      const action = str(res.action) ? findAction(str(res.action) ?? "", after.scene.place).action : null;
       const label = motion ? motionLabel(motion, c) : null;
       const kid = !name
         ? null
         : motion === "stop"
           ? `${name} stops`
-          : label
-            ? `${name}, ${label.toLowerCase()}!`
-            : `${name} moves!`;
+          : action
+            ? `${name} ${action.caption}`
+            : label
+              ? `${name}, ${label.toLowerCase()}!`
+              : `${name} moves!`;
       return {
         kid,
         tag: `apply_motion · ${c?.sketchId ?? str(args.character) ?? ""} · ${motion ?? "steps"}`,
         flash: [],
       };
+    }
+    case "apply_motions": {
+      const actions = Array.isArray(args.actions) ? (args.actions as Array<Record<string, unknown>>) : [];
+      const items = Array.isArray(res.results) ? (res.results as Array<Record<string, unknown>>) : [];
+      const names = actions
+        .filter((_, i) => items[i]?.ok === true)
+        .map((a) => subject(str(a.character), after))
+        .flatMap((c) => (c ? [cap(displayName(c))] : []));
+      const kid =
+        names.length > 1
+          ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} — action!`
+          : names.length === 1
+            ? `${names[0]} moves!`
+            : null;
+      const tag = `apply_motions · ${actions.map((a) => str(a.motion) ?? "steps").join(" · ")}`;
+      return { kid, tag, flash: [] };
     }
     case "arrange_scene": {
       const parts: string[] = [];
@@ -95,11 +119,7 @@ export function describeActivity(
       const tags: string[] = [];
       const { place, time, weather } = after.scene;
       if (place && place !== before.scene.place) {
-        parts.push(
-          place === "blank"
-            ? "A plain stage!"
-            : `Off to the ${(placeById(place)?.label ?? place).toLowerCase()}!`,
-        );
+        parts.push(SHOUT[place] ?? `Off to the ${(placeById(place)?.label ?? place).toLowerCase()}!`);
         flash.push(`place:${place}`);
         tags.push(place);
       }
@@ -123,13 +143,6 @@ export function describeActivity(
         tags.push("placements");
       }
       return { kid, tag: `arrange_scene · ${tags.join(" · ")}`, flash };
-    }
-    case "add_effect": {
-      const id = str(args.effect) ?? "";
-      const on = args.on !== false && id !== "none";
-      const label = EFFECTS.find((e) => e.id === id)?.label ?? cap(id);
-      const kid = id === "none" ? "All clear" : on ? `${label}!` : `No more ${label.toLowerCase()}`;
-      return { kid, tag: `add_effect · ${id} · ${on ? "on" : "off"}`, flash: on ? [`effect:${id}`] : [] };
     }
     default:
       return { kid: null, tag: tool, flash: [] };

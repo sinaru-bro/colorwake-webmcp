@@ -12,8 +12,9 @@ const SAMPLES: Record<ToolName, string> = {
   pick_sketch: '{ "sketch": "cat" }',
   set_tool: '{ "tool": "brush", "color": "sky" }',
   apply_motion: '{ "character": "cat", "motion": "fly" }',
+  apply_motions:
+    '{ "actions": [{ "character": "cat", "motion": "dance" }, { "character": "bird", "motion": "dance" }] }',
   arrange_scene: '{ "place": "sea", "time": "night", "weather": "snow" }',
-  add_effect: '{ "effect": "hearts" }',
 };
 
 export function DevPanel() {

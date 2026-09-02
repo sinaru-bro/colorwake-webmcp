@@ -1,29 +1,61 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { PALETTE, paletteColor } from "../content/palette";
-import { Icon, type IconName } from "../render/icons";
-import { setTool, undo } from "../state/actions";
+import { MyFriends } from "../app/MyFriends";
+import { PALETTE } from "../content/palette";
+import { colorHex, isCustomColor, isLightColor } from "../lib/color";
+import { ToolIcon } from "../render/icons";
+import { enterPlay, setTool } from "../state/actions";
+import { coloredCharacters } from "../state/selectors";
 import { useStudio } from "../state/store";
-import type { ColorId, StrokeSize, ToolId } from "../state/types";
+import type { StrokeSize, ToolId } from "../state/types";
 import { useUi } from "../state/ui";
 
-const TOOLS: { id: ToolId; label: string; icon: IconName; color: string }[] = [
-  { id: "fill", label: "Fill", icon: "fill", color: "#ff7a1a" },
-  { id: "pen", label: "Marker", icon: "pen", color: "#3e63dd" },
-  { id: "brush", label: "Brush", icon: "brush", color: "#f27da8" },
-  { id: "pencil", label: "Pencil", icon: "pencil", color: "#46a758" },
+const TOOLS: { id: ToolId; label: string }[] = [
+  { id: "brush", label: "Brush" },
+  { id: "pencil", label: "Pencil" },
+  { id: "pen", label: "Marker" },
+  { id: "fill", label: "Fill" },
 ];
 const SIZES: { id: StrokeSize; dot: number }[] = [
   { id: "s", dot: 8 },
   { id: "m", dot: 14 },
   { id: "l", dot: 20 },
 ];
-const LIGHT_COLORS = new Set<ColorId>(["yellow", "sky", "peach", "white"]);
 const HELPER_CHIP_MS = 1500;
+const CUSTOM_START = "#ff8a5b";
+const DARK_INK = "#2e2a26";
 
 const vars = (v: Record<string, string>) => v as CSSProperties;
+const swatchVars = (hex: string) => vars({ "--c": hex, "--ck": isLightColor(hex) ? DARK_INK : "#fff" });
+
+/** Rainbow swatch that opens the system color picker for any color outside the palette. */
+function CustomSwatch({ color, pulse }: { color: string; pulse: boolean }) {
+  const on = isCustomColor(color);
+  const [last, setLast] = useState(on ? color : CUSTOM_START);
+  const value = on ? color : last;
+  return (
+    <label
+      className={`swatch swatch--custom${on ? " swatch--on" : ""}${on && pulse ? " swatch--pulse" : ""}`}
+      style={swatchVars(value)}
+      title="Any color"
+    >
+      <input
+        type="color"
+        className="swatch__input"
+        aria-label="Any color"
+        value={value}
+        onChange={(e) => {
+          const hex = e.target.value.toLowerCase();
+          setLast(hex);
+          setTool({ color: hex });
+        }}
+      />
+    </label>
+  );
+}
 
 export function PalettePanel() {
   const tool = useStudio((s) => s.tool);
+  const canPlay = useStudio((s) => coloredCharacters(s).length > 0);
   const pulse = useUi((s) => s.helperPulse);
   const [seen, setSeen] = useState(pulse);
   const chip = pulse > 0 && pulse !== seen;
@@ -46,11 +78,10 @@ export function PalettePanel() {
                 key={t.id}
                 type="button"
                 className={`tool${on ? " tool--on" : ""}${on && chip ? " tool--pulse" : ""}`}
-                style={vars({ "--tc": t.color })}
                 aria-pressed={on}
                 onClick={() => setTool({ tool: t.id })}
               >
-                <Icon name={t.icon} size={30} />
+                <ToolIcon name={t.id} size={44} />
                 <span>{t.label}</span>
               </button>
             );
@@ -65,7 +96,6 @@ export function PalettePanel() {
               key={s.id}
               type="button"
               className={`size${tool.size === s.id ? " size--on" : ""}`}
-              disabled={tool.tool === "fill"}
               aria-label={`Size ${s.id}`}
               aria-pressed={tool.size === s.id}
               onClick={() => setTool({ size: s.id })}
@@ -85,7 +115,7 @@ export function PalettePanel() {
                 key={c.id}
                 type="button"
                 className={`swatch${on ? " swatch--on" : ""}${on && chip ? " swatch--pulse" : ""}`}
-                style={vars({ "--c": c.hex, "--ck": LIGHT_COLORS.has(c.id) ? "#2e2a26" : "#fff" })}
+                style={swatchVars(c.hex)}
                 aria-label={c.label}
                 aria-pressed={on}
                 title={c.label}
@@ -93,26 +123,25 @@ export function PalettePanel() {
               />
             );
           })}
+          <CustomSwatch color={tool.color} pulse={chip} />
         </div>
       </section>
-      <div className="side__actions">
-        <button type="button" className="act" aria-label="Undo" title="Undo" onClick={() => undo()}>
-          <Icon name="undo" size={26} />
-        </button>
-      </div>
+      <MyFriends />
+      <button type="button" className="play-cta" disabled={!canPlay} onClick={() => enterPlay()}>
+        Let&apos;s play with my friends!
+      </button>
     </>
   );
 }
 
 export function PaletteRail() {
   const tool = useStudio((s) => s.tool);
-  const current = TOOLS.find((t) => t.id === tool.tool) ?? TOOLS[0];
   return (
     <>
-      <span className="rail__tool" style={{ color: current.color }}>
-        <Icon name={current.icon} size={26} />
+      <span className="rail__tool">
+        <ToolIcon name={tool.tool} size={32} />
       </span>
-      <span className="rail__color" style={{ background: paletteColor(tool.color)?.hex }} />
+      <span className="rail__color" style={{ background: colorHex(tool.color) }} />
     </>
   );
 }
