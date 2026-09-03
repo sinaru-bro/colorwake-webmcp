@@ -68,14 +68,6 @@ export function loadSaved(): StudioState | null {
   }
 }
 
-export function clearSaved(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // storage unavailable; nothing to clear
-  }
-}
-
 export function saveNow(state: StudioState): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));

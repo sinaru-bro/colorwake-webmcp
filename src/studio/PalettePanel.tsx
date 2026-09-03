@@ -53,22 +53,11 @@ function CustomSwatch({ color, pulse }: { color: string; pulse: boolean }) {
   );
 }
 
-export function PalettePanel() {
+/** The PC sidebar's Tools, Size and Colors sections, shared with the phone sheet. */
+export function ToolSections({ chip = false }: { chip?: boolean }) {
   const tool = useStudio((s) => s.tool);
-  const canPlay = useStudio((s) => coloredCharacters(s).length > 0);
-  const agent = useUi((s) => s.agent);
-  const pulse = useUi((s) => s.helperPulse);
-  const [seen, setSeen] = useState(pulse);
-  const chip = pulse > 0 && pulse !== seen;
-  useEffect(() => {
-    if (pulse === seen) return;
-    const t = setTimeout(() => setSeen(pulse), HELPER_CHIP_MS);
-    return () => clearTimeout(t);
-  }, [pulse, seen]);
-
   return (
     <>
-      {chip && <span className="helper-chip">✨ Helper picked this</span>}
       <section className="side__sec">
         <span className="side__label">Tools</span>
         <div className="tools">
@@ -127,6 +116,26 @@ export function PalettePanel() {
           <CustomSwatch color={tool.color} pulse={chip} />
         </div>
       </section>
+    </>
+  );
+}
+
+export function PalettePanel() {
+  const canPlay = useStudio((s) => coloredCharacters(s).length > 0);
+  const agent = useUi((s) => s.agent);
+  const pulse = useUi((s) => s.helperPulse);
+  const [seen, setSeen] = useState(pulse);
+  const chip = pulse > 0 && pulse !== seen;
+  useEffect(() => {
+    if (pulse === seen) return;
+    const t = setTimeout(() => setSeen(pulse), HELPER_CHIP_MS);
+    return () => clearTimeout(t);
+  }, [pulse, seen]);
+
+  return (
+    <>
+      {chip && <span className="helper-chip">✨ Helper picked this</span>}
+      <ToolSections chip={chip} />
       <MyFriends />
       <div className="play-dock">
         <button type="button" className="play-cta" disabled={!canPlay} onClick={() => enterPlay()}>

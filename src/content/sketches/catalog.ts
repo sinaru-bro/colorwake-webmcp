@@ -27,7 +27,7 @@ export const SKETCHES: SketchMeta[] = [
     rig: "swimmer",
     level: "normal",
     facing: "left",
-    baseline: 472,
+    baseline: 456,
     regions: [
       { id: "head", label: "head" },
       { id: "body", label: "body" },

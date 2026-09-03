@@ -316,7 +316,3 @@ export function moveCharacter(id: string, position: Position): boolean {
 export function hydrate(state: StudioState): void {
   replaceState({ ...state, characters: withAutoLayout(state.characters, state.cast) });
 }
-
-export function startFresh(): void {
-  resetAll();
-}

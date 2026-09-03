@@ -7,7 +7,7 @@ import { SketchSurface } from "../render/SketchSurface";
 import { addStroke, fillRegion, finishPicture, undo } from "../state/actions";
 import { activeCharacter, isColored, progress } from "../state/selectors";
 import { useStudio } from "../state/store";
-import type { ToolState } from "../state/types";
+import { LIMITS, type ToolState } from "../state/types";
 import { useUi } from "../state/ui";
 import { MobileSketchBrowser } from "./MobileDock";
 import { usePhone } from "./phone";
@@ -118,14 +118,49 @@ export function Canvas() {
   const pct = active ? progress(active) : 0;
   const colored = active ? isColored(active) : false;
   const canUndo = useUi((s) => (active ? (s.undo[active.id]?.length ?? 0) : 0) > 0);
+  const trayFull = state.characters.length >= LIMITS.maxCharacters;
 
+  const doneUi = active && sketch && (
+    <button
+      type="button"
+      className="done"
+      disabled={!colored}
+      aria-label="Done"
+      title="Done"
+      onClick={() => finishPicture()}
+    >
+      <Icon name="check" size={34} />
+      <svg className="done__ring" viewBox="0 0 84 84" aria-hidden="true">
+        <circle cx="42" cy="42" r={RING_R} fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="5" />
+        <circle
+          cx="42"
+          cy="42"
+          r={RING_R}
+          fill="none"
+          stroke="#fff"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={`${(pct * CIRC).toFixed(1)} ${CIRC.toFixed(1)}`}
+        />
+      </svg>
+    </button>
+  );
   return (
     <div ref={host} className="main">
       <div className="board" style={{ width: size, height: size }}>
+        {phone && !(active && sketch) && !trayFull && (
+          <div className="mtitle">
+            Pick a picture below
+            <br />
+            <span className="canvas__arrow">↓</span>
+          </div>
+        )}
         <div ref={canvas} className="canvas">
           {active && sketch ? (
             <>
               <SketchSurface
+                key={active.id}
+                className={phone ? "sketch-grow" : undefined}
                 sketch={sketch}
                 paint={active.paint}
                 interactive
@@ -135,6 +170,14 @@ export function Canvas() {
               />
               <ToolCursor canvas={canvas} tool={state.tool} scale={(size - CANVAS_PAD * 2) / SKETCH_UNITS} />
             </>
+          ) : trayFull ? (
+            <div className="canvas__empty canvas__empty--full">
+              <div>
+                My friends is full!
+                <br />
+                <span className="canvas__hint">Hold a picture there to make room</span>
+              </div>
+            </div>
           ) : phone ? (
             <MobileSketchBrowser />
           ) : (
@@ -159,35 +202,9 @@ export function Canvas() {
             <Icon name="undo" size={28} />
           </button>
         )}
+        {phone && doneUi}
       </div>
-      {active && sketch && (
-        <>
-          {!colored && <div className="done__tip">Add some color first</div>}
-          <button
-            type="button"
-            className="done"
-            disabled={!colored}
-            aria-label="Done"
-            title="Done"
-            onClick={() => finishPicture()}
-          >
-            <Icon name="check" size={34} />
-            <svg className="done__ring" viewBox="0 0 84 84" aria-hidden="true">
-              <circle cx="42" cy="42" r={RING_R} fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="5" />
-              <circle
-                cx="42"
-                cy="42"
-                r={RING_R}
-                fill="none"
-                stroke="#fff"
-                strokeWidth="5"
-                strokeLinecap="round"
-                strokeDasharray={`${(pct * CIRC).toFixed(1)} ${CIRC.toFixed(1)}`}
-              />
-            </svg>
-          </button>
-        </>
-      )}
+      {!phone && doneUi}
     </div>
   );
 }

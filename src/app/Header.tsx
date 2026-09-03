@@ -13,7 +13,7 @@ function AgentBadge() {
       ? { cls: "", text: "WebMCP ready", detail: `${TOOL_NAMES.length} site tools` }
       : {
           cls: " badge--none",
-          text: "WebMCP built-in",
+          text: "WebMCP",
           detail: "This device can't connect yet — use ChatGPT desktop or Chrome 149+",
         };
   return (

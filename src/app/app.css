@@ -159,6 +159,18 @@
   }
 }
 
+.canvas__empty--full {
+  justify-content: center;
+  padding-bottom: 0;
+}
+
+.canvas__hint {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .canvas--live {
   cursor: none;
 }
@@ -294,18 +306,6 @@
   inset: -6px;
   transform: rotate(-90deg);
   pointer-events: none;
-}
-
-.done__tip {
-  position: absolute;
-  right: 16px;
-  bottom: 100px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 12px;
-  padding: 5px 9px;
-  border-radius: 8px;
-  z-index: 4;
 }
 
 /* sidebar */
@@ -1350,8 +1350,7 @@
   animation: fade-in 0.4s 0.08s ease-out both;
 }
 
-.shell--leave .done,
-.shell--leave .done__tip {
+.shell--leave .done {
   animation: fade-in 0.3s 0.3s ease-out both;
 }
 
@@ -1456,17 +1455,45 @@
 /* Phone portrait: the canvas owns the screen; choices swipe like photos. */
 @media (max-aspect-ratio: 1/1) and (max-width: 600px) {
   .side,
-  .strip {
+  .strip,
+  .shell--enter .strip--hidden {
     display: none;
   }
   .main {
-    padding: 8px 8px 178px;
+    padding: 74px 8px 268px;
+  }
+  .mtitle {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    padding-bottom: 4px;
+    text-align: center;
+    line-height: 1.2;
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--muted);
+    z-index: 4;
+  }
+  .undo {
+    right: 70px;
+    width: 48px;
+    height: 48px;
+  }
+  .undo svg {
+    width: 24px;
+    height: 24px;
   }
   .done {
     right: 12px;
-    bottom: 186px;
-    width: 60px;
-    height: 60px;
+    bottom: 12px;
+    width: 48px;
+    height: 48px;
+  }
+  .done svg {
+    width: 26px;
+    height: 26px;
   }
   .done__ring {
     display: none;
@@ -1487,6 +1514,10 @@
     background: var(--panel);
     box-shadow: var(--shadow);
     cursor: pointer;
+  }
+  .mdock-fab--play {
+    top: auto;
+    bottom: calc(16px + env(safe-area-inset-bottom));
   }
   .mdock-fab:disabled {
     opacity: 0.4;
@@ -1511,24 +1542,47 @@
     gap: 6px;
   }
   .mbrowse .mswipe__thumb {
-    width: 180px;
-    height: 180px;
+    width: min(44vw, 200px);
+    height: min(44vw, 200px);
   }
-  .mbrowse__go {
-    align-self: center;
-    height: 48px;
-    padding: 0 24px;
-    margin-bottom: 10px;
+  .mbrowse__side {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 52px;
     border: 0;
-    border-radius: 999px;
-    background: var(--acc);
-    color: #fff;
-    font: 800 16px var(--display);
-    box-shadow: var(--shadow);
+    background: none;
+    padding: 0;
+    opacity: 0.45;
+    color: var(--muted);
     cursor: pointer;
+    z-index: 2;
   }
-  .mbrowse__go:active {
-    transform: scale(0.96);
+  .mbrowse__side--prev {
+    left: 6px;
+  }
+  .mbrowse__side--next {
+    right: 6px;
+  }
+  .mbrowse__side:active {
+    opacity: 0.7;
+  }
+  .mbrowse__ghost {
+    width: 46px;
+    height: 46px;
+  }
+  .mbrowse__ghost svg {
+    width: 100%;
+    height: 100%;
+  }
+  .mbrowse__tri {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
   }
   .mbar {
     position: fixed;
@@ -1538,10 +1592,9 @@
     z-index: 5;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
+    gap: 56px;
+    padding: 8px 12px calc(44px + env(safe-area-inset-bottom));
     background: var(--bg);
-    border-top: 1px solid var(--line);
   }
   .mbar .side__sec--works {
     display: flex;
@@ -1561,14 +1614,15 @@
   }
   .mbar .work {
     flex: none;
-    width: var(--touch);
-    height: var(--touch);
+    width: 72px;
+    height: 72px;
   }
   .mbar .play-dock {
     position: static;
     width: 100%;
     margin: 0;
     outline: 0;
+    background: none;
   }
   .msheet {
     position: fixed;
@@ -1586,21 +1640,66 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(86vw, 340px);
+    width: clamp(272px, 74vw, 320px);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
+    padding: 16px 12px calc(10px + env(safe-area-inset-bottom));
     background: var(--panel);
     border-radius: 22px 0 0 22px;
     box-shadow: var(--shadow);
     animation: mdrawer-in 0.26s ease-out;
   }
-  .msheet__sec {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  .msheet__panel .side__sec {
+    align-items: center;
+  }
+  .msheet__panel .mswipe {
+    align-self: stretch;
+  }
+  .msheet__panel .side__sec--works {
+    flex: 1;
+    align-self: stretch;
+    min-height: 0;
+  }
+  .msheet__panel .works {
+    flex: 1 1 auto;
+    height: 0;
+    max-height: none;
+    overflow-y: auto;
+    justify-content: center;
+  }
+  .mswipe__scene {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .msheet__panel .side__sec .mswipe__item {
+    opacity: 0.55;
+    width: 72px;
+    height: 80px;
+    padding: 6px 8px 4px;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    transition:
+      transform 0.2s ease,
+      color 0.2s ease,
+      opacity 0.2s ease;
+  }
+  .msheet__panel .side__sec .mswipe__item > span:last-of-type {
+    max-width: 52px;
+    text-align: center;
+    line-height: 1.15;
+  }
+  .msheet__panel .side__sec .mswipe__item--on {
+    opacity: 1;
+    border-color: var(--acc);
+    background: var(--acc-soft);
+  }
+  .msheet__panel .side__sec .mswipe__item--on .mswipe__scene {
+    font-size: 34px;
+  }
+  .msheet__panel .play-dock {
+    margin-top: auto;
   }
   .mswipe {
     display: flex;
@@ -1613,6 +1712,37 @@
   }
   .mswipe::-webkit-scrollbar {
     display: none;
+  }
+  .mswipe--page {
+    gap: 0;
+    padding: 8px 0;
+  }
+  .mswipe--page .mswipe__item {
+    min-width: 100%;
+    gap: 6px;
+    font-size: 14px;
+  }
+  .mswipe--page .mswipe__item--on {
+    transform: none;
+  }
+  .mswipe--start {
+    padding: 8px calc(100% - 84px) 8px 12px;
+    scroll-padding-left: 12px;
+  }
+  .mswipe--start .mswipe__item {
+    scroll-snap-align: start;
+  }
+  .mswipe--start .mswipe__item--on {
+    transform-origin: left center;
+  }
+  .sketch-grow {
+    animation: sketch-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+    transform-origin: 50% 50%;
+  }
+  @keyframes sketch-in {
+    from {
+      transform: scale(0.72);
+    }
   }
   .mswipe__item {
     flex: none;
@@ -1644,24 +1774,22 @@
     width: 100%;
     height: 100%;
   }
-  .mswipe__dot {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+  .msheet__panel--tools .side__sec {
+    align-items: stretch;
   }
-  .mswipe__sizedot {
-    border-radius: 50%;
-    background: var(--ink);
+  .msheet__panel .tools,
+  .msheet__panel .sizes,
+  .msheet__panel .swgrid {
+    justify-content: flex-start;
   }
-  .msheet__colors {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .msheet__panel .tools {
+    gap: 12px;
   }
-  .msheet__colors .mswipe {
+  .msheet__panel .tools .tool {
     flex: 1;
-    min-width: 0;
+  }
+  .msheet__panel .sizes .size {
+    flex: 1;
   }
 }
 

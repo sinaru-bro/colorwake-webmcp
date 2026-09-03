@@ -46,7 +46,6 @@ export interface UiState {
   undo: Record<string, Paint[]>;
   zoom: { scale: number; pan: Position };
   sidebarOpen: boolean;
-  resumePending: boolean;
   agent: { support: AgentSupport };
   activity: Activity[];
   flash: { keys: string[]; n: number } | null;
@@ -69,7 +68,6 @@ export const uiStore = createStore<UiState>(() => ({
   undo: {},
   zoom: { scale: 1, pan: { x: 0, y: 0 } },
   sidebarOpen: typeof window === "undefined" || window.innerWidth >= 1000,
-  resumePending: false,
   agent: { support: "none" },
   activity: [],
   flash: null,
@@ -109,9 +107,6 @@ export const ui = {
   },
   setSidebar(open: boolean): void {
     uiStore.setState({ sidebarOpen: open });
-  },
-  setResumePending(pending: boolean): void {
-    uiStore.setState({ resumePending: pending });
   },
   setAgent(support: AgentSupport): void {
     uiStore.setState({ agent: { support } });

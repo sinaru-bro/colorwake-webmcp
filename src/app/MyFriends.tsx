@@ -6,15 +6,17 @@ import { displayName } from "../state/selectors";
 import { useStudio } from "../state/store";
 import { LIMITS } from "../state/types";
 import { useUi } from "../state/ui";
+import { usePhone } from "../studio/phone";
 import { useHold } from "./useHold";
 
 const ARM_HOLD_MS = 500;
 const ARM_TIMEOUT_MS = 5000;
 
 /**
- * The player's finished pictures, newest first. While coloring, a tap puts one back on the canvas;
- * while playing, a tap puts a friend on or off the play screen and the trailing + starts a new picture.
- * Hold any tile for ×. An empty list shows one dashed slot.
+ * The player's pictures, newest first; the one on the canvas keeps its spot and glows while coloring.
+ * A tap puts one back on the canvas; while playing, a tap puts a friend on or off the play screen.
+ * On phones a leading + starts a new picture until the tray is full; elsewhere an empty list shows
+ * one dashed slot. Hold any tile for ×.
  */
 export function MyFriends() {
   const characters = useStudio((s) => s.characters);
@@ -23,7 +25,7 @@ export function MyFriends() {
   const mode = useStudio((s) => s.mode);
   const pulse = useUi((s) => s.notice?.at === "friends");
   const playing = mode === "play";
-  const saved = playing ? characters : characters.filter((c) => c.id !== activeId);
+  const saved = characters;
   const total = characters.length;
   const newestFirst = [...saved].reverse().sort((a, b) => b.createdAt - a.createdAt);
   const [armed, setArmed] = useState<string | null>(null);
@@ -49,7 +51,8 @@ export function MyFriends() {
     };
   }, [armedId]);
 
-  const add = playing && total < LIMITS.maxCharacters;
+  const phone = usePhone();
+  const add = phone && total < LIMITS.maxCharacters;
   const blank = newestFirst.length === 0 && !add;
   return (
     <section className={`side__sec side__sec--works${pulse ? " side__sec--pulse" : ""}`}>
@@ -60,10 +63,21 @@ export function MyFriends() {
         {playing && <span className="works__hint">{LIMITS.maxOnStage} friends at a time — tap to swap</span>}
       </div>
       <div className="works" aria-label="My friends">
+        {add && (
+          <button
+            type="button"
+            className="work work--add"
+            aria-label="Color another"
+            title="Color another"
+            onClick={() => colorAnother()}
+          >
+            +
+          </button>
+        )}
         {newestFirst.map((c) => {
           const sketch = sketchById(c.sketchId);
           if (!sketch) return null;
-          const on = playing && cast.includes(c.id);
+          const on = playing ? cast.includes(c.id) : c.id === activeId;
           const name = displayName(c);
           return (
             <div
@@ -113,17 +127,6 @@ export function MyFriends() {
             </div>
           );
         })}
-        {add && (
-          <button
-            type="button"
-            className="work work--add"
-            aria-label="Color another"
-            title="Color another"
-            onClick={() => colorAnother()}
-          >
-            +
-          </button>
-        )}
         {blank && <span className="work work--empty" aria-hidden="true" />}
       </div>
     </section>

@@ -1,6 +1,6 @@
 import "./app/app.css";
 import { DevPanel } from "./app/DevPanel";
-import { Notice, ResumeDialog } from "./app/Dialogs";
+import { Notice } from "./app/Dialogs";
 import { Header } from "./app/Header";
 import { Hud } from "./app/Hud";
 import { Sidebar } from "./app/Sidebar";
@@ -45,7 +45,6 @@ export default function App() {
         </Sidebar>
       </div>
       <MobileDock />
-      <ResumeDialog />
       <Stash />
       {DEV && <DevPanel />}
     </div>

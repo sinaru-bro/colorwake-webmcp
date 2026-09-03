@@ -30,7 +30,9 @@ export function Stash() {
   useEffect(() => {
     const el = pic.current;
     if (!el || !stash) return;
-    const tile = document.querySelector(`[data-work="${CSS.escape(stash.characterId)}"]`);
+    const tile = Array.from(document.querySelectorAll(`[data-work="${CSS.escape(stash.characterId)}"]`)).find(
+      (t) => t.getBoundingClientRect().width > 0,
+    );
     const thumb = tile?.querySelector(".work__pick")?.firstElementChild;
     if (!thumb) {
       ui.endStash();

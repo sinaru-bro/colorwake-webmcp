@@ -1,26 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-rig="swimmer">
-  <g data-part="tail-fin" data-pivot="392 300">
-    <path data-region="tail-fin" d="M386 300 L456 218 C472 262 472 338 456 382 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <g data-part="tail-fin" data-pivot="392 284">
+    <path data-region="tail-fin" d="M386 284 L456 202 C472 246 472 322 456 366 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g data-part="fin-top" data-pivot="262 212">
-    <path data-region="top-fin" d="M196 224 C224 154 300 140 328 214 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <g data-part="fin-top" data-pivot="262 196">
+    <path data-region="top-fin" d="M196 208 C224 138 300 124 328 198 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g data-part="body" data-pivot="256 300">
-    <path data-region="body" d="M106 300 C106 244 174 200 256 200 C338 200 406 244 406 300 C406 356 338 400 256 400 C174 400 106 356 106 300 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-    <path data-region="stripe-1" d="M250 202 C232 258 232 342 250 398 C266 398 282 398 292 396 C274 342 274 258 292 204 C282 202 266 202 250 202 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-    <path data-region="stripe-2" d="M322 214 C304 268 304 332 322 386 C338 380 354 372 366 362 C352 322 352 278 366 238 C354 228 338 220 322 214 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-    <path data-region="belly" d="M176 352 C204 392 308 392 336 352 C308 376 204 376 176 352 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <g data-part="body" data-pivot="256 284">
+    <path data-region="body" d="M106 284 C106 228 174 184 256 184 C338 184 406 228 406 284 C406 340 338 384 256 384 C174 384 106 340 106 284 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="stripe-1" d="M250 186 C232 242 232 326 250 382 C266 382 282 382 292 380 C274 326 274 242 292 188 C282 186 266 186 250 186 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="stripe-2" d="M322 198 C304 252 304 316 322 370 C338 364 354 356 366 346 C352 306 352 262 366 222 C354 212 338 204 322 198 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <path data-region="belly" d="M176 336 C204 376 308 376 336 336 C308 360 204 360 176 336 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g data-part="fin-l" data-pivot="214 322">
-    <path data-region="side-fin" d="M212 320 C246 336 256 378 222 396 C192 380 190 340 212 320 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <g data-part="fin-l" data-pivot="214 306">
+    <path data-region="side-fin" d="M212 304 C246 320 256 362 222 380 C192 364 190 324 212 304 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
   </g>
-  <g data-part="head" data-pivot="196 300">
-    <path data-region="head" d="M62 300 C62 258 96 224 138 224 C180 224 214 258 214 300 C214 342 180 376 138 376 C96 376 62 342 62 300 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <g data-part="head" data-pivot="196 284">
+    <path data-region="head" d="M62 284 C62 242 96 208 138 208 C180 208 214 242 214 284 C214 326 180 360 138 360 C96 360 62 326 62 284 Z" stroke="#2B2B2B" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
     <g data-outline="true">
-      <circle cx="112" cy="284" r="14" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="4"/>
-      <circle cx="116" cy="286" r="7" fill="#2B2B2B"/>
-      <path d="M80 328 C90 340 106 340 116 330" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
-      <path d="M182 262 C200 286 200 314 182 338" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="112" cy="268" r="14" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="4"/>
+      <circle cx="116" cy="270" r="7" fill="#2B2B2B"/>
+      <path d="M80 312 C90 324 106 324 116 314" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
+      <path d="M182 246 C200 270 200 298 182 322" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"/>
     </g>
   </g>
 </svg>

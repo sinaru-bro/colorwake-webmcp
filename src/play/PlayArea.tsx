@@ -8,10 +8,12 @@ import { BackLayers, ForeLayer, WeatherLayer } from "./scene/SceneLayers";
 
 const SINGLE_HEIGHT = 0.38;
 const GROUP_HEIGHT = 0.28;
+/** Cap by stage width so the outer stage spots stay fully on narrow screens. */
+const WIDTH_CAP = 0.5;
 
 export function PlayArea() {
   const host = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
+  const [size, setSize] = useState({ w: 0, h: 0 });
   const state = useStudio((s) => s);
   const characters = castCharacters(state);
   const anyColored = coloredCharacters(state).length > 0;
@@ -22,13 +24,16 @@ export function PlayArea() {
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
       setStage(width, height);
-      setHeight(height);
+      setSize({ w: width, h: height });
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
-  const baseHeight = height * (characters.length <= 1 ? SINGLE_HEIGHT : GROUP_HEIGHT);
+  const baseHeight = Math.min(
+    size.h * (characters.length <= 1 ? SINGLE_HEIGHT : GROUP_HEIGHT),
+    size.w * WIDTH_CAP,
+  );
   return (
     <div ref={host} className="main">
       <div className="play" style={HORIZON_STYLE}>
