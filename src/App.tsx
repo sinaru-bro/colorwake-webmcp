@@ -11,6 +11,7 @@ import { ScenePanel, SceneRail } from "./play/ScenePanel";
 import { useStudio } from "./state/store";
 import { useUi } from "./state/ui";
 import { Canvas } from "./studio/Canvas";
+import { MobileDock } from "./studio/MobileDock";
 import { PalettePanel, PaletteRail } from "./studio/PalettePanel";
 import { SketchStrip } from "./studio/SketchStrip";
 
@@ -41,6 +42,7 @@ export default function App() {
         </Sidebar>
       </div>
       <SketchStrip />
+      <MobileDock />
       <ResumeDialog />
       <Stash />
       {DEV && <DevPanel />}

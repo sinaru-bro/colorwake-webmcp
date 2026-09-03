@@ -135,9 +135,12 @@ export function Canvas() {
           ) : (
             <div className="canvas__empty">
               <div>
-                Pick a picture below
-                <br />
-                <span className="canvas__arrow">↓</span>
+                <span className="only-wide">
+                  Pick a picture below
+                  <br />
+                  <span className="canvas__arrow">↓</span>
+                </span>
+                <span className="only-phone">Tap ↗ to pick a picture</span>
               </div>
             </div>
           )}

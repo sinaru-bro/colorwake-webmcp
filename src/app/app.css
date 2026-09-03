@@ -1,5 +1,6 @@
 .shell {
-  height: 100%;
+  height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: 56px 1fr auto;
   background: var(--bg);
@@ -1437,5 +1438,158 @@
 @media (max-aspect-ratio: 1/1) and (max-width: 819px) {
   .swgrid {
     max-width: calc(6 * var(--touch) + 40px);
+  }
+}
+
+.only-phone {
+  display: none;
+}
+
+/* Phone portrait: the canvas owns the screen; choices live behind a floating button. */
+@media (max-aspect-ratio: 1/1) and (max-width: 600px) {
+  .side,
+  .strip {
+    display: none;
+  }
+  .main {
+    padding: 10px 10px 84px;
+  }
+  .only-wide {
+    display: none;
+  }
+  .only-phone {
+    display: inline;
+  }
+  .mdock-fab {
+    position: fixed;
+    top: 66px;
+    right: 10px;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .mdock-fab--pulse {
+    animation: fab-pulse 1.6s ease-in-out infinite;
+  }
+  .mdock-fab__color {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+  }
+  .mdock-fab__emoji {
+    font-size: 24px;
+  }
+  .msheet {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+  }
+  .msheet__scrim {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(46, 42, 38, 0.35);
+  }
+  .msheet__panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 80dvh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 14px calc(16px + env(safe-area-inset-bottom));
+    background: var(--panel);
+    border-radius: 22px 22px 0 0;
+    box-shadow: var(--shadow);
+    animation: msheet-up 0.24s ease-out;
+  }
+  .msheet__sec {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mswipe {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 6px calc(50% - var(--half, 44px));
+    scrollbar-width: none;
+  }
+  .mswipe::-webkit-scrollbar {
+    display: none;
+  }
+  .mswipe__item {
+    flex: none;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: calc(var(--half, 44px) * 2);
+    min-height: 64px;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    background: var(--panel);
+    font: 700 12px var(--display);
+    color: var(--ink);
+  }
+  .mswipe__item--on {
+    border-color: var(--acc);
+    background: var(--acc-soft);
+  }
+  .mswipe__thumb {
+    width: 52px;
+    height: 52px;
+  }
+  .mswipe__thumb svg {
+    width: 100%;
+    height: 100%;
+  }
+  .mswipe__dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+  }
+  .msheet__colors {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .msheet__colors .mswipe {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@keyframes msheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0.6;
+  }
+}
+
+@keyframes fab-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
   }
 }
