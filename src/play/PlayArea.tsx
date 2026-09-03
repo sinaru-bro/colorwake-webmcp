@@ -15,7 +15,6 @@ export function PlayArea() {
   const state = useStudio((s) => s);
   const characters = castCharacters(state);
   const anyColored = coloredCharacters(state).length > 0;
-  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     const el = host.current;
@@ -29,21 +28,13 @@ export function PlayArea() {
     return () => ro.disconnect();
   }, []);
 
-  const shownOpen = openId && characters.some((c) => c.id === openId) ? openId : null;
   const baseHeight = height * (characters.length <= 1 ? SINGLE_HEIGHT : GROUP_HEIGHT);
   return (
-    <div ref={host} className="main" onClick={(e) => e.target === e.currentTarget && setOpenId(null)}>
+    <div ref={host} className="main">
       <div className="play" style={HORIZON_STYLE}>
         <BackLayers scene={state.scene} />
         {characters.map((c) => (
-          <Actor
-            key={c.id}
-            character={c}
-            baseHeight={baseHeight}
-            windy={state.scene.weather === "wind"}
-            open={shownOpen === c.id}
-            onOpen={setOpenId}
-          />
+          <Actor key={c.id} character={c} baseHeight={baseHeight} windy={state.scene.weather === "wind"} />
         ))}
         <ForeLayer scene={state.scene} />
         <WeatherLayer scene={state.scene} />

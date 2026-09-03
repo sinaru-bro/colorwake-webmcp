@@ -27,11 +27,14 @@ export default function App() {
     <div className={`shell${entering ? " shell--enter" : ""}${leaving ? " shell--leave" : ""}`}>
       <Header />
       <div className="body">
-        <div className="stage">
-          {coloring ? <Canvas /> : <PlayArea />}
-          <Hud />
-          <Notice />
-          <Transition />
+        <div className="stage-col">
+          <div className="stage">
+            {coloring ? <Canvas /> : <PlayArea />}
+            <Hud />
+            <Notice />
+            <Transition />
+          </div>
+          <SketchStrip />
         </div>
         <Sidebar
           label={coloring ? "Tools" : "Scene"}
@@ -41,7 +44,6 @@ export default function App() {
           {coloring ? <PalettePanel /> : <ScenePanel />}
         </Sidebar>
       </div>
-      <SketchStrip />
       <MobileDock />
       <ResumeDialog />
       <Stash />
