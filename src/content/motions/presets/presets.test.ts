@@ -18,16 +18,16 @@ const rigs = RIGS.map((r) => r.id);
 
 describe("preset catalog", () => {
   it("has a lean preset set per body type, six universal presets and stop", () => {
-    expect(PRESETS).toHaveLength(34);
+    expect(PRESETS).toHaveLength(41);
     expect(UNIVERSAL_IDS.sort()).toEqual(["grow", "hide", "jump", "spin", "stop", "wiggle"]);
-    const counts: Record<string, number> = { quadruped: 7, swimmer: 5, winged: 5, biped: 6, object: 5 };
+    const counts: Record<string, number> = { quadruped: 7, swimmer: 7, winged: 7, biped: 7, object: 7 };
     for (const rig of rigs) expect(PRESETS.filter((p) => p.rig === rig)).toHaveLength(counts[rig]);
     expect(UNIVERSAL_IDS).toContain(FALLBACK_PRESET_ID);
     expect(UNIVERSAL_IDS).toContain(STOP_PRESET_ID);
   });
   it("gives every body type its shared moves plus a signature move", () => {
     for (const rig of rigs) {
-      for (const id of ["swim", "fly", "dance", "greet"])
+      for (const id of ["swim", "fly", "dance", "greet", "walk", "run"])
         expect(findPreset(id, rig)?.source, `${rig}/${id}`).toBe("rig");
     }
     const signatures: Record<string, string> = {
@@ -123,10 +123,10 @@ describe("lookup", () => {
       const list = presetsForRig(rig);
       const counts: Record<string, number> = {
         quadruped: 13,
-        swimmer: 11,
-        winged: 11,
-        biped: 12,
-        object: 11,
+        swimmer: 13,
+        winged: 13,
+        biped: 13,
+        object: 13,
       };
       expect(list).toHaveLength(counts[rig]);
       expect(list.map((p) => p.id)).toContain("stop");

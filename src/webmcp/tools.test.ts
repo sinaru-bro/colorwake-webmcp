@@ -195,9 +195,10 @@ describe("apply_motion", () => {
   });
   it("skips parts another rig lacks and falls back to wiggle when nothing remains", () => {
     const id = colored("rocket");
-    const res = call("apply_motion", { character: id, motion: "walk" });
+    const res = call("apply_motion", { character: id, motion: "wag" });
     expect(res.ok).toBe(true);
     expect(res.source).toBe("other");
+    expect(res.fallback).toBe("wiggle");
     expect((res.skipped as string[]).length).toBeGreaterThan(0);
   });
   it("rejects nine steps at the schema", () => {

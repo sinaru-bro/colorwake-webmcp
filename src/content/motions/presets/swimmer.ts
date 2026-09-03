@@ -11,6 +11,49 @@ export const SWIMMER_PRESETS: Preset[] = [
     loop: false,
     steps: [wave("fin-l", 30, 4, 1400, -35), nod("head", 8, 700), bounce(5, 700)],
   }),
+  many({ id: "walk", rig: "swimmer", label: "Walk", sayings: ["stroll", "march", "go"] }, [
+    {
+      id: "stroll",
+      label: "Stroll",
+      mode: "parallel",
+      loop: true,
+      steps: [
+        wave("tail-fin", 20, 1, 600),
+        wave("fin-l", 12, 1, 600),
+        bounce(6, 300),
+        nod("head", 4, 600),
+        move(760, 0, "line", 4800),
+      ],
+    },
+    {
+      id: "march",
+      label: "March",
+      mode: "parallel",
+      loop: true,
+      steps: [
+        wave("tail-fin", 28, 1, 420),
+        wave("fin-l", 16, 1, 420),
+        bounce(10, 210),
+        nod("head", 6, 420),
+        move(760, 0, "line", 3360),
+      ],
+    },
+  ]),
+  one({
+    id: "run",
+    rig: "swimmer",
+    label: "Run",
+    sayings: ["dash", "sprint", "zoom"],
+    mode: "parallel",
+    loop: true,
+    steps: [
+      wave("tail-fin", 35, 1, 300),
+      wave("fin-l", 20, 1, 300),
+      bounce(10, 300),
+      lean(0, -6, 600),
+      move(1000, 0, "line", 2400),
+    ],
+  }),
   many(
     { id: "swim", rig: "swimmer", label: "Swim", sayings: ["paddle", "go swimming"] },
     swimVariants(undefined, [

@@ -1,5 +1,17 @@
 import type { Preset } from "../../../state/types";
-import { bounce, danceVariants, flyVariants, many, move, nod, one, rot, swimVariants, wave } from "./shared";
+import {
+  bounce,
+  danceVariants,
+  flyVariants,
+  lean,
+  many,
+  move,
+  nod,
+  one,
+  rot,
+  swimVariants,
+  wave,
+} from "./shared";
 
 const stride = (legs: number, arms: number, ms: number) => [
   rot("leg-l", -legs, legs, ms),
@@ -43,6 +55,15 @@ export const BIPED_PRESETS: Preset[] = [
       steps: [...stride(28, 22, 380), bounce(8, 190), move(700, 0, "line", 2660)],
     },
   ]),
+  one({
+    id: "run",
+    rig: "biped",
+    label: "Run",
+    sayings: ["dash", "sprint", "zoom"],
+    mode: "parallel",
+    loop: true,
+    steps: [...stride(32, 26, 300), bounce(10, 300), lean(0, -6, 600), move(1000, 0, "line", 2400)],
+  }),
   many(
     { id: "swim", rig: "biped", label: "Swim", sayings: ["paddle", "go swimming", "front crawl"] },
     swimVariants({ rotate: 80 }, [
