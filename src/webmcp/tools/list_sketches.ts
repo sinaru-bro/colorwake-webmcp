@@ -15,7 +15,7 @@ export const listSketches = defineTool({
   name: "list_sketches",
   title: "Browse sketches",
   description:
-    "List the coloring sketches the child can pick: id, title, body type (rig), difficulty (easy = a few big regions for 3–4 year olds, normal = 8–12 regions) and a few English synonyms children use for it. Use it to find the sketch id for pick_sketch when the child names an animal or thing in any language. Read-only.",
+    "List the coloring sketches the player can pick: id, title, body type (rig), difficulty (easy = a few big regions, normal = 8–12 regions) and a few English synonyms for it. Use it to find the sketch id for pick_sketch when the player names an animal or thing in any language. Read-only.",
   schema: ListSketchesInput,
   readOnly: true,
   execute(input) {

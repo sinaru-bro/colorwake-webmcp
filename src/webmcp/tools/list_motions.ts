@@ -49,7 +49,7 @@ export const listMotions = defineTool({
   name: "list_motions",
   title: "Browse motions and scenes",
   description:
-    "List what the play screen can do: motion presets for a character (its body type's plus universal ones) with their variants, the place actions drawn into the current scene (swing, slide, bus, inside) and where the others are, the primitives you can combine into your own motion (move, rotate, scale, bounce, shake, spin, flip, tilt, fade, wave) with limits, the body parts you may target, and scene options. Call it when the child asks for something new. Read-only.",
+    "List what the play screen can do: motion presets for a character (its body type's plus universal ones) with their variants, the place actions drawn into the current scene (swing, slide, bus, inside) and where the others are, the primitives you can combine into your own motion (move, rotate, scale, bounce, shake, spin, flip, tilt, fade, wave) with limits, the body parts you may target, and scene options. Call it when the player asks for something new. Read-only.",
   schema: ListMotionsInput,
   readOnly: true,
   execute(input) {

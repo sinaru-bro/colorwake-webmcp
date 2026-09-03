@@ -569,12 +569,27 @@
   background: transparent;
 }
 
-.play-cta {
+.play-dock {
   margin-top: auto;
   flex-shrink: 0;
   position: sticky;
   bottom: 0;
   outline: 8px solid var(--panel);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.play-dock__hint {
+  text-align: center;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: #b9ad99;
+}
+
+.play-cta {
   height: 56px;
   border: 0;
   border-radius: 16px;
@@ -1398,7 +1413,7 @@
     height: auto;
     max-height: calc(2 * var(--touch) + 8px + 16px);
   }
-  .play-cta {
+  .play-dock {
     order: 3;
     flex: 0 0 auto;
     width: min(100%, 360px);

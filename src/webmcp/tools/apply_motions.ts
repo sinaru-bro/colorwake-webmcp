@@ -6,7 +6,7 @@ export const applyMotions = defineTool({
   name: "apply_motions",
   title: "Make several characters move",
   description:
-    'Animate up to three friends in one call — each action works like apply_motion (preset from list_motions, optional variant, speed, loop). Use it whenever the child wants more than one friend moving ("everybody dance!") instead of calling apply_motion repeatedly. Actions start together and each reports its own result. For a single friend, or composed steps, use apply_motion.',
+    'Animate up to three friends in one call — each action works like apply_motion (preset from list_motions, optional variant, speed, loop). Use it whenever the player wants more than one friend moving ("everybody dance!") instead of calling apply_motion repeatedly. Actions start together and each reports its own result. For a single friend, or composed steps, use apply_motion.',
   schema: ApplyMotionsInput,
   execute(input) {
     const parsed = parseInput(ApplyMotionsInput, input);

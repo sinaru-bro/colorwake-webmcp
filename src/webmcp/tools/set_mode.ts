@@ -11,7 +11,7 @@ export const setMode = defineTool({
   name: "set_mode",
   title: "Switch between coloring and playing",
   description:
-    'Switch between coloring and playing, like the on-screen buttons ("Let\'s play with my friends!" and the + in My friends). mode "play" puts the current picture in My friends and turns the canvas into the play screen, where up to 3 friends come alive — use when the child says they are done or wants to play. mode "color" goes back to coloring with the sketch strip open — use when the child wants to color another picture. A picture needs at least one color before it can play.',
+    'Switch between coloring and playing, like the on-screen buttons ("Let\'s play with my friends!" and the + in My friends). mode "play" puts the current picture in My friends and turns the canvas into the play screen, where up to 3 friends come alive — use when the player says they are done or wants to play. mode "color" goes back to coloring with the sketch strip open — use when the player wants to color another picture. A picture needs at least one color before it can play.',
   schema: SetModeInput,
   execute(input) {
     const parsed = parseInput(SetModeInput, input);
@@ -20,7 +20,7 @@ export const setMode = defineTool({
       const res = enterPlay();
       if (!res.ok) {
         return fail("not_colored_yet", "Nothing is colored yet, so there is nothing to play with.", {
-          hint: "Offer a color with set_tool — the child needs to color first.",
+          hint: "Offer a color with set_tool — the player needs to color first.",
         });
       }
       const s = getState();

@@ -16,7 +16,7 @@ export interface ActivityNote {
   flash: string[];
 }
 
-const READ_TOOLS = new Set(["get_studio_state", "list_sketches", "list_motions"]);
+const READ_TOOLS = new Set(["get_guide", "get_studio_state", "list_sketches", "list_motions"]);
 const TOOL_LABELS: Record<string, string> = { fill: "Fill", pen: "Marker", brush: "Brush", pencil: "Pencil" };
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
@@ -35,7 +35,7 @@ function motionLabel(id: string, c: Character | null): string | null {
   return rig ? (findPreset(id, rig)?.preset.label ?? id) : id;
 }
 
-/** Turns a finished tool call into the on-screen caption (for the child) and tag (for grown-ups). */
+/** Turns a finished tool call into the on-screen caption (for the player) and tag (for grown-ups). */
 export function describeActivity(
   tool: string,
   input: unknown,

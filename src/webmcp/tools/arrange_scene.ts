@@ -14,7 +14,7 @@ export const arrangeScene = defineTool({
   name: "arrange_scene",
   title: "Set the scene",
   description:
-    'Compose the play screen: the place (home, sea, sky …), day or night, the weather (clear, rain, snow …) and where colored pictures stand (left, center, right, sky or exact x/y) — placing one brings it on stage. Use when the child answers "where are we? day or night? what\'s the weather?" or wants characters to go somewhere or meet. Anything goes — a fish on land is fine. Only what you pass changes; nextQuestion is what to ask next. Does not change colors or motions.',
+    'Compose the play screen: the place (home, sea, sky …), day or night, the weather (clear, rain, snow …) and where colored pictures stand (left, center, right, sky or exact x/y) — placing one brings it on stage. Use when the player answers "where are we? day or night? what\'s the weather?" or wants characters to go somewhere or meet. Anything goes — a fish on land is fine. Only what you pass changes; nextQuestion is what to ask next. Does not change colors or motions.',
   schema: ArrangeSceneInput,
   execute(input) {
     const parsed = parseInput(ArrangeSceneInput, input);

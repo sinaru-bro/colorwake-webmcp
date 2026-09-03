@@ -12,7 +12,7 @@ export const pickSketch = defineTool({
   name: "pick_sketch",
   title: "Put a sketch on the canvas",
   description:
-    "Put a coloring sketch on the canvas for the child to color, exactly like tapping it in the sketch strip. Use when the child names what they want to color. If the current picture already has color it is kept in My friends (up to 20 pictures); a blank one is replaced. Switches to coloring mode if the child was playing. Does not color anything — the child does the coloring.",
+    "Put a coloring sketch on the canvas for the player to color, exactly like tapping it in the sketch strip. Use when the player names what they want to color. If the current picture already has color it is kept in My friends (up to 20 pictures); a blank one is replaced. Switches to coloring mode if the player was playing. Does not color anything — the player does the coloring.",
   schema: PickSketchInput,
   execute(input) {
     const parsed = parseInput(PickSketchInput, input);
@@ -42,7 +42,7 @@ export const pickSketch = defineTool({
       replaced: res.replaced,
       regions: sketch.regions.map((r) => r.id),
       switchedTo: res.switchedTo,
-      hint: "The child can start coloring now.",
+      hint: "The player can start coloring now.",
     });
   },
 });

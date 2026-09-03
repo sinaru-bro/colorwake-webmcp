@@ -162,7 +162,7 @@ export function runApplyMotion(input: unknown) {
     if (found.action && !found.here) {
       const where = found.places.map((p) => placeById(p)?.label ?? p).join(" or ");
       return fail("not_here", `${found.action.label} needs the ${where} scene.`, {
-        hint: "Ask the child if they want to go there, then arrange_scene with that place first.",
+        hint: "Ask the player if they want to go there, then arrange_scene with that place first.",
         options: found.places,
       });
     }

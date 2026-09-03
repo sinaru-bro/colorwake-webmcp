@@ -6,7 +6,7 @@ import type { Scene, SceneAxis } from "../state/types";
 
 const SHOW_MS = 2800;
 const SHOW_READ_MS = 1500;
-/** How long a question stays up — enough for a grown-up to read it and ask the child. */
+/** How long a question stays up — enough for a grown-up to read it and ask the player. */
 const ASK_MS = 5000;
 
 /** Asks each unset scene axis once per visit to the play screen, then gets out of the way. */
@@ -29,7 +29,7 @@ function Guide({ scene, visible }: { scene: Scene; visible: boolean }) {
   );
 }
 
-/** One surface above the stage: what the helper just did, or the next question to ask the child. */
+/** One surface above the stage: what the helper just did, or the next question to ask the player. */
 export function Hud() {
   const mode = useStudio((s) => s.mode);
   const scene = useStudio((s) => s.scene);

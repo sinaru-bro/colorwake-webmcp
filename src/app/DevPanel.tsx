@@ -5,6 +5,7 @@ import { TOOL_NAMES, type ToolName } from "../webmcp/toolNames";
 import { seedDemo } from "./devSeed";
 
 const SAMPLES: Record<ToolName, string> = {
+  get_guide: "{}",
   get_studio_state: "{}",
   list_sketches: "{}",
   list_motions: "{}",

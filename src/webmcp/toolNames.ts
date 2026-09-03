@@ -1,4 +1,5 @@
 export const TOOL_NAMES = [
+  "get_guide",
   "get_studio_state",
   "list_sketches",
   "list_motions",

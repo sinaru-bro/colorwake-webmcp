@@ -80,7 +80,7 @@ export function resolveCharacter(ref: string, requireColored = true): CharacterR
   }
   if (requireColored && !isColored(found.character)) {
     return fail("not_colored_yet", "That picture has no color yet, so it cannot play.", {
-      hint: "Offer a color with set_tool — the child needs to color first.",
+      hint: "Offer a color with set_tool — the player needs to color first.",
     });
   }
   return { ok: true, character: found.character };
@@ -93,7 +93,7 @@ export function ensurePlayMode(): Switch {
   const res = enterPlay();
   if (!res.ok) {
     return fail("not_colored_yet", "Nothing is colored yet, so there is nothing to play with.", {
-      hint: "Offer a color with set_tool — the child needs to color first.",
+      hint: "Offer a color with set_tool — the player needs to color first.",
     });
   }
   return { ok: true, switchedTo: "play" };

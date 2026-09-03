@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const GetGuideInput = z.strictObject({});
+
 export const GetStudioStateInput = z.strictObject({});
 
 export const ListSketchesInput = z.strictObject({
@@ -7,7 +9,7 @@ export const ListSketchesInput = z.strictObject({
     .enum(["quadruped", "swimmer", "winged", "biped", "object"])
     .optional()
     .describe("Filter by body type"),
-  level: z.enum(["easy", "normal"]).optional().describe("easy = big regions for younger children"),
+  level: z.enum(["easy", "normal"]).optional().describe("easy = a few big regions"),
 });
 
 export const ListMotionsInput = z.strictObject({

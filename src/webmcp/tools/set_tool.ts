@@ -15,7 +15,7 @@ export const setTool = defineTool({
   name: "set_tool",
   title: "Change brush and color",
   description:
-    "Hand the child a drawing tool and color: fill (tap a region to fill it — best for 3–4 year olds), pen, brush or pencil, in a palette color (red, orange, yellow, green, sky, blue, purple, white, peach, brown, black) or any other color as a CSS name or #rrggbb hex (mint, turquoise, #ff69b4 become custom colors). Use when the child asks for a color or tool. Changes only what the next touch paints with. Does not paint anything and does not change existing colors.",
+    "Hand the player a drawing tool and color: fill (tap a region to fill it — the simplest), pen, brush or pencil, in a palette color (red, orange, yellow, green, sky, blue, purple, white, peach, brown, black) or any other color as a CSS name or #rrggbb hex (mint, turquoise, #ff69b4 become custom colors). Use when the player asks for a color or tool. Changes only what the next touch paints with. Does not paint anything and does not change existing colors.",
   schema: SetToolInput,
   execute(input) {
     const parsed = parseInput(SetToolInput, input);

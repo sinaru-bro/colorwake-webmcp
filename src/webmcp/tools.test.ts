@@ -28,8 +28,9 @@ beforeEach(() => {
 });
 
 describe("tool registry", () => {
-  it("has nine tools in the fixed order with descriptions under 480 characters", () => {
+  it("has ten tools in the fixed order with descriptions under 480 characters", () => {
     expect(TOOLS.map((t) => t.name)).toEqual([
+      "get_guide",
       "get_studio_state",
       "list_sketches",
       "list_motions",
@@ -53,8 +54,9 @@ describe("tool registry", () => {
       expect(schema.$schema).toBeUndefined();
     }
   });
-  it("marks exactly the three read tools as read-only", () => {
+  it("marks exactly the four read tools as read-only", () => {
     expect(TOOLS.filter((t) => t.readOnly).map((t) => t.name)).toEqual([
+      "get_guide",
       "get_studio_state",
       "list_sketches",
       "list_motions",
@@ -256,6 +258,15 @@ describe("play screen", () => {
     expect(getState().cast).toContain(a);
     expect(getState().cast).toHaveLength(3);
     expect(call("apply_motion", { character: a, motion: "fly" })).toMatchObject({ broughtOnStage: false });
+  });
+});
+
+describe("get_guide", () => {
+  it("returns the guide with every tool mentioned, under 3000 characters", () => {
+    const res = call("get_guide") as Result & { guide: string };
+    expect(res.ok).toBe(true);
+    for (const t of TOOLS) expect(res.guide).toContain(t.name);
+    expect(res.guide.length).toBeLessThanOrEqual(3000);
   });
 });
 

@@ -56,6 +56,7 @@ function CustomSwatch({ color, pulse }: { color: string; pulse: boolean }) {
 export function PalettePanel() {
   const tool = useStudio((s) => s.tool);
   const canPlay = useStudio((s) => coloredCharacters(s).length > 0);
+  const agent = useUi((s) => s.agent);
   const pulse = useUi((s) => s.helperPulse);
   const [seen, setSeen] = useState(pulse);
   const chip = pulse > 0 && pulse !== seen;
@@ -127,9 +128,14 @@ export function PalettePanel() {
         </div>
       </section>
       <MyFriends />
-      <button type="button" className="play-cta" disabled={!canPlay} onClick={() => enterPlay()}>
-        Let&apos;s play with my friends!
-      </button>
+      <div className="play-dock">
+        <button type="button" className="play-cta" disabled={!canPlay} onClick={() => enterPlay()}>
+          Let&apos;s play with my friends!
+        </button>
+        {agent.support === "native" && canPlay && (
+          <span className="play-dock__hint">or just say &quot;Let&apos;s play!&quot;</span>
+        )}
+      </div>
     </>
   );
 }

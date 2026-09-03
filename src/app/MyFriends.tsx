@@ -12,7 +12,7 @@ const ARM_HOLD_MS = 500;
 const ARM_TIMEOUT_MS = 5000;
 
 /**
- * The child's finished pictures, newest first. While coloring, a tap puts one back on the canvas;
+ * The player's finished pictures, newest first. While coloring, a tap puts one back on the canvas;
  * while playing, a tap puts a friend on or off the play screen and the trailing + starts a new picture.
  * Hold any tile for ×. An empty list shows one dashed slot.
  */
