@@ -1,8 +1,10 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { MyFriends } from "../app/MyFriends";
 import { PALETTE } from "../content/palette";
+import { sketchById } from "../content/sketches/catalog";
 import { colorHex, isCustomColor, isLightColor } from "../lib/color";
 import { ToolIcon } from "../render/icons";
+import { SketchSurface } from "../render/SketchSurface";
 import { enterPlay, setTool } from "../state/actions";
 import { coloredCharacters } from "../state/selectors";
 import { useStudio } from "../state/store";
@@ -151,12 +153,35 @@ export function PalettePanel() {
 
 export function PaletteRail() {
   const tool = useStudio((s) => s.tool);
+  const characters = useStudio((s) => s.characters);
+  const stack = [...characters]
+    .reverse()
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 2)
+    .flatMap((c) => {
+      const sketch = sketchById(c.sketchId);
+      return sketch ? [{ id: c.id, sketch, paint: c.paint }] : [];
+    });
+  const front = stack[0];
+  const back = stack[1];
   return (
     <>
       <span className="rail__tool">
         <ToolIcon name={tool.tool} size={32} />
       </span>
       <span className="rail__color" style={{ background: colorHex(tool.color) }} />
+      {front && (
+        <span className="rail__stack" aria-hidden="true">
+          {back && (
+            <span className="rail__work rail__work--back">
+              <SketchSurface sketch={back.sketch} paint={back.paint} />
+            </span>
+          )}
+          <span className="rail__work rail__work--front" data-work={front.id}>
+            <SketchSurface sketch={front.sketch} paint={front.paint} />
+          </span>
+        </span>
+      )}
     </>
   );
 }

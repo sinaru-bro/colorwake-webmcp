@@ -15,7 +15,7 @@ const ARM_TIMEOUT_MS = 5000;
 /**
  * The player's pictures, newest first; the one on the canvas keeps its spot and glows while coloring.
  * A tap puts one back on the canvas; while playing, a tap puts a friend on or off the play screen.
- * On phones a leading + starts a new picture until the tray is full; elsewhere an empty list shows
+ * On compact layouts a leading + starts a new picture until the tray is full; elsewhere an empty list shows
  * one dashed slot. Hold any tile for ×.
  */
 export function MyFriends() {

@@ -10,7 +10,7 @@ import { useStudio } from "../state/store";
 import { LIMITS, type ToolState } from "../state/types";
 import { useUi } from "../state/ui";
 import { MobileSketchBrowser } from "./MobileDock";
-import { useLandscape, usePhone } from "./phone";
+import { useLandscape, usePad, usePadLandscape, usePhone } from "./phone";
 
 const RING_R = 37;
 const CIRC = 2 * Math.PI * RING_R;
@@ -113,6 +113,8 @@ export function Canvas() {
   const size = useSquareSize(host);
   const phone = usePhone();
   const land = useLandscape();
+  const pad = usePad();
+  const padLand = usePadLandscape();
   const state = useStudio((s) => s);
   const active = activeCharacter(state);
   const sketch = active ? sketchById(active.sketchId) : undefined;
@@ -203,9 +205,9 @@ export function Canvas() {
             <Icon name="undo" size={28} />
           </button>
         )}
-        {(phone || land) && doneUi}
+        {(phone || pad || land || padLand) && doneUi}
       </div>
-      {!phone && !land && doneUi}
+      {!phone && !pad && !land && !padLand && doneUi}
     </div>
   );
 }

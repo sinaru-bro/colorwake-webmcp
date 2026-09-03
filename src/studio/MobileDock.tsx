@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { MyFriends } from "../app/MyFriends";
-import { SKETCH_LIST } from "../content/sketches/catalog";
+import { SKETCH_LIST, sketchById } from "../content/sketches/catalog";
 import { colorHex } from "../lib/color";
 import { ScenePanel } from "../play/ScenePanel";
-import { ToolSections } from "./PalettePanel";
+import { PalettePanel, ToolSections } from "./PalettePanel";
 import { SCENE_ICONS } from "../play/sceneIcons";
 import { ToolIcon } from "../render/icons";
 import { SketchSurface } from "../render/SketchSurface";
@@ -11,8 +11,8 @@ import { enterPlay, pickSketch } from "../state/actions";
 import { coloredCharacters } from "../state/selectors";
 import { useStudio } from "../state/store";
 import type { Paint } from "../state/types";
-import { ui } from "../state/ui";
-import { usePhone } from "./phone";
+import { ui, useUi } from "../state/ui";
+import { usePad, usePhone } from "./phone";
 import { Swipe } from "./Swipe";
 
 const EMPTY_PAINT: Paint = { fills: {}, strokes: [] };
@@ -98,35 +98,50 @@ export function MobileSketchBrowser() {
 
 export function MobileDock() {
   const phone = usePhone();
+  const pad = usePad();
   const mode = useStudio((s) => s.mode);
   const place = useStudio((s) => s.scene.place);
   const tool = useStudio((s) => s.tool);
   const canPlay = useStudio((s) => coloredCharacters(s).length > 0);
   const hasActive = useStudio((s) => s.activeCharacterId !== null);
+  const characters = useStudio((s) => s.characters);
+  const friendsPulse = useUi((s) => s.notice?.at === "friends");
   const [open, setOpen] = useState(
     () => import.meta.env.DEV && new URLSearchParams(window.location.search).get("sheet") === "1",
   );
+  const [friendsOpen, setFriendsOpen] = useState(false);
   const modeRef = useRef(mode);
   useEffect(() => {
     if (modeRef.current === mode) return;
     modeRef.current = mode;
     setOpen(false);
+    setFriendsOpen(false);
   }, [mode]);
-  if (!phone) return null;
+  if (!phone && !pad) return null;
   const coloring = mode === "color";
   const close = () => setOpen(false);
+  const stack = [...characters]
+    .reverse()
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 2)
+    .flatMap((c) => {
+      const sketch = sketchById(c.sketchId);
+      return sketch ? [{ id: c.id, sketch, paint: c.paint }] : [];
+    });
+  const front = stack[0];
+  const back = stack[1];
   return (
     <>
       <button
         type="button"
         className={`mdock-fab${coloring ? "" : " mdock-fab--play"}`}
         aria-label={coloring ? "Tools and colors" : "Scene and friends"}
-        disabled={coloring && !hasActive}
+        disabled={coloring && phone && !hasActive}
         onClick={() => setOpen(true)}
       >
         {coloring ? (
           <>
-            <ToolIcon name={tool.tool} size={26} />
+            <ToolIcon name={tool.tool} size={pad ? 34 : 26} />
             <span className="mdock-fab__color" style={{ background: colorHex(tool.color) }} />
           </>
         ) : (
@@ -135,9 +150,25 @@ export function MobileDock() {
           </span>
         )}
       </button>
-      {coloring && (
+      {coloring && phone && front && (
+        <button
+          type="button"
+          className={`mdock-fab mdock-fab--friends${friendsPulse ? " mdock-fab--pulse" : ""}`}
+          aria-label="My friends"
+          onClick={() => setFriendsOpen(true)}
+        >
+          {back && (
+            <span className="mfab__card mfab__card--back" aria-hidden="true">
+              <SketchSurface sketch={back.sketch} paint={back.paint} />
+            </span>
+          )}
+          <span className="mfab__card mfab__card--front" data-work={front.id} aria-hidden="true">
+            <SketchSurface sketch={front.sketch} paint={front.paint} />
+          </span>
+        </button>
+      )}
+      {coloring && phone && (
         <div className="mbar">
-          <MyFriends />
           <div className="play-dock">
             <button type="button" className="play-cta" disabled={!canPlay} onClick={() => enterPlay()}>
               Let&apos;s play with my friends!
@@ -149,7 +180,25 @@ export function MobileDock() {
         <div className="msheet">
           <button type="button" className="msheet__scrim" aria-label="Close" onClick={close} />
           <div className={`msheet__panel${coloring ? " msheet__panel--tools" : ""}`}>
-            {coloring ? <ToolSections /> : <ScenePanel />}
+            {coloring ? pad ? <PalettePanel /> : <ToolSections /> : <ScenePanel />}
+          </div>
+        </div>
+      )}
+      {coloring && phone && friendsOpen && (
+        <div className="msheet">
+          <button
+            type="button"
+            className="msheet__scrim"
+            aria-label="Close"
+            onClick={() => setFriendsOpen(false)}
+          />
+          <div
+            className="msheet__panel msheet__panel--friends"
+            onClickCapture={(e) => {
+              if ((e.target as Element).closest(".work__pick, .work--add")) setFriendsOpen(false);
+            }}
+          >
+            <MyFriends />
           </div>
         </div>
       )}

@@ -15,7 +15,7 @@ function boxStyle(r: Rect) {
   return { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` };
 }
 
-/** Shrinks a finished picture from the canvas into its new My friends tile, then gives the tile a bump. */
+/** Shrinks a finished picture from the canvas into its My friends tile, or the visible stack that keeps it, then bumps the target. */
 export function Stash() {
   const stash = useUi((s) => s.stash);
   const character = useStudio((s) => s.characters.find((c) => c.id === stash?.characterId));
@@ -30,10 +30,17 @@ export function Stash() {
   useEffect(() => {
     const el = pic.current;
     if (!el || !stash) return;
-    const tile = Array.from(document.querySelectorAll(`[data-work="${CSS.escape(stash.characterId)}"]`)).find(
-      (t) => t.getBoundingClientRect().width > 0,
-    );
-    const thumb = tile?.querySelector(".work__pick")?.firstElementChild;
+    const tile =
+      Array.from(document.querySelectorAll(`[data-work="${CSS.escape(stash.characterId)}"]`)).find(
+        (t) => t.getBoundingClientRect().width > 0,
+      ) ??
+      [".rail__stack", ".mdock-fab--friends", ".mdock-fab"]
+        .map((sel) => document.querySelector(sel))
+        .find((el) => el !== null && el.getBoundingClientRect().width > 0);
+    const thumb =
+      tile?.querySelector(".work__pick")?.firstElementChild ??
+      tile?.querySelector(".rail__work--front, .mfab__card--front") ??
+      tile?.firstElementChild;
     if (!thumb) {
       ui.endStash();
       return;

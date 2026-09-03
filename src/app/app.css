@@ -864,6 +864,35 @@
   border: 2px solid rgba(0, 0, 0, 0.12);
 }
 
+/* The newest picture resting under the color dot, the previous one peeking out below. */
+.rail__stack {
+  position: relative;
+  width: 40px;
+  height: 47px;
+}
+
+.rail__work {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: #fff;
+  padding: 2px;
+}
+
+.rail__work svg {
+  width: 100%;
+  height: 100%;
+}
+
+.rail__work--back {
+  transform: translate(5px, 7px) rotate(8deg) scale(0.94);
+  opacity: 0.6;
+}
+
 @keyframes pulse {
   50% {
     transform: scale(1.12);
@@ -1446,14 +1475,8 @@
   }
 }
 
-@media (max-aspect-ratio: 1/1) and (max-width: 819px) {
-  .swgrid {
-    max-width: calc(6 * var(--touch) + 40px);
-  }
-}
-
-/* Swipe rows and the in-canvas sketch browser, shared by phone portrait and phone landscape. */
-@media (max-aspect-ratio: 1/1) and (max-width: 600px), (orientation: landscape) and (max-height: 600px) {
+/* Swipe rows and the in-canvas sketch browser, shared by portrait screens and landscape phones. */
+@media (max-aspect-ratio: 1/1) and (max-width: 1024px), (orientation: landscape) and (max-height: 600px) {
   .mswipe {
     display: flex;
     align-items: center;
@@ -1570,15 +1593,13 @@
   }
 }
 
-/* Phone portrait: the canvas owns the screen; choices swipe like photos. */
-@media (max-aspect-ratio: 1/1) and (max-width: 600px) {
-  .side,
-  .strip,
-  .shell--enter .strip--hidden {
+/* Portrait phones and tablets: the canvas owns the screen; choices swipe like photos. */
+@media (max-aspect-ratio: 1/1) and (max-width: 1024px) {
+  .side {
     display: none;
   }
   .main {
-    padding: 74px 8px 268px;
+    padding: 74px 8px calc(88px + env(safe-area-inset-bottom));
   }
   .mtitle {
     position: absolute;
@@ -1651,6 +1672,34 @@
   .mdock-fab__emoji {
     font-size: 24px;
   }
+  .mdock-fab--friends {
+    top: 132px;
+  }
+  .mdock-fab--pulse {
+    animation: pulse 0.4s ease-in-out 2;
+  }
+  .mfab__card {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+    padding: 2px;
+  }
+  .mfab__card svg {
+    width: 100%;
+    height: 100%;
+  }
+  .mfab__card--back {
+    transform: translate(-7px, -7px) rotate(-8deg);
+    opacity: 0.55;
+  }
+  .mfab__card--front {
+    transform: translate(4px, 4px);
+  }
   .mbar {
     position: fixed;
     left: 0;
@@ -1659,30 +1708,8 @@
     z-index: 5;
     display: flex;
     flex-direction: column;
-    gap: 56px;
-    padding: 8px 12px calc(44px + env(safe-area-inset-bottom));
+    padding: 8px 12px calc(18px + env(safe-area-inset-bottom));
     background: var(--bg);
-  }
-  .mbar .side__sec--works {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .mbar .works {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    height: auto;
-    max-height: none;
-    scrollbar-width: none;
-  }
-  .mbar .works::-webkit-scrollbar {
-    display: none;
-  }
-  .mbar .work {
-    flex: none;
-    width: 72px;
-    height: 72px;
   }
   .mbar .play-dock {
     position: static;
@@ -1707,12 +1734,12 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: clamp(272px, 74vw, 320px);
+    width: clamp(260px, 74vw, 288px);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding: 16px 12px calc(10px + env(safe-area-inset-bottom));
+    padding: 26px 12px 0;
     background: var(--panel);
     border-radius: 22px 0 0 22px;
     box-shadow: var(--shadow);
@@ -1720,21 +1747,29 @@
   }
   .msheet__panel .side__sec {
     align-items: center;
+    gap: 12px;
+  }
+  .msheet__panel .side__sec:has(.chips) {
+    align-items: stretch;
+  }
+  .msheet__panel .side__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
   }
   .msheet__panel .mswipe {
     align-self: stretch;
   }
   .msheet__panel .side__sec--works {
-    flex: 1;
+    flex: none;
     align-self: stretch;
-    min-height: 0;
   }
   .msheet__panel .works {
-    flex: 1 1 auto;
-    height: 0;
+    flex: none;
+    height: auto;
     max-height: none;
-    overflow-y: auto;
-    justify-content: center;
+    overflow: visible;
+    justify-content: start;
   }
   .mswipe__scene {
     font-size: 22px;
@@ -1767,6 +1802,18 @@
   }
   .msheet__panel .play-dock {
     margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    outline: 0;
+    background: var(--panel);
+    min-height: 0;
+    padding: 12px 0 calc(10px + env(safe-area-inset-bottom));
+  }
+  .msheet__panel .play-dock__hint {
+    display: none;
+  }
+  .msheet__panel--tools .side__sec:last-child {
+    margin-bottom: calc(10px + env(safe-area-inset-bottom));
   }
   .mswipe--start {
     padding: 8px calc(100% - 84px) 8px 12px;
@@ -1782,9 +1829,11 @@
     align-items: stretch;
   }
   .msheet__panel .tools,
-  .msheet__panel .sizes,
-  .msheet__panel .swgrid {
+  .msheet__panel .sizes {
     justify-content: flex-start;
+  }
+  .msheet__panel .swgrid {
+    justify-content: space-between;
   }
   .msheet__panel .tools {
     gap: 12px;
@@ -1794,6 +1843,56 @@
   }
   .msheet__panel .sizes .size {
     flex: 1;
+  }
+  .msheet__panel--friends {
+    top: 66px;
+    bottom: auto;
+    width: auto;
+    max-height: calc(100dvh - 82px);
+    padding: 18px 16px 20px;
+  }
+  .msheet__panel--friends .side__sec--works {
+    flex: none;
+  }
+  .msheet__panel--friends .works {
+    flex: none;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    grid-template-columns: repeat(4, 64px);
+    grid-auto-rows: 64px;
+    justify-content: start;
+  }
+  .msheet__panel--friends .work {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* Phone portrait only: no room for the sketch strip. */
+@media (max-aspect-ratio: 1/1) and (max-width: 600px) {
+  .strip,
+  .shell--enter .strip--hidden {
+    display: none;
+  }
+}
+
+/* Tablet portrait: the sketch strip returns below the canvas and the drawer carries the full palette panel. */
+@media (max-aspect-ratio: 1/1) and (min-width: 601px) and (max-width: 1024px) {
+  .main {
+    padding: 74px 12px 16px;
+  }
+  .mdock-fab {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+  }
+  .mdock-fab__color {
+    width: 18px;
+    height: 18px;
+  }
+  .mdock-fab__emoji {
+    font-size: 30px;
   }
 }
 
@@ -1852,6 +1951,54 @@
   .done svg {
     width: 22px;
     height: 22px;
+  }
+  .done__ring {
+    display: none;
+  }
+}
+
+/* Tablet landscape: the desktop frame, but the sidebar scrolls as one above the pinned button. */
+@media (orientation: landscape) and (min-height: 601px) and (pointer: coarse) {
+  .side {
+    overflow-y: auto;
+    padding-bottom: 0;
+  }
+  .side__sec--works {
+    flex: 0 0 auto;
+  }
+  .works {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    animation: none;
+  }
+  .play-dock {
+    min-height: 0;
+    outline: 0;
+    padding: 10px 0 12px;
+  }
+  .play-dock__hint {
+    display: none;
+  }
+  .undo {
+    right: 66px;
+    width: 44px;
+    height: 44px;
+  }
+  .undo svg {
+    width: 22px;
+    height: 22px;
+  }
+  .done {
+    right: 12px;
+    bottom: 12px;
+    width: 44px;
+    height: 44px;
+  }
+  .done svg {
+    width: 24px;
+    height: 24px;
   }
   .done__ring {
     display: none;
