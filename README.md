@@ -27,6 +27,7 @@ Deploys the static build to Cloudflare Workers Static Assets.
 
 | Tool               | Kind  | What it does                                                                |
 | ------------------ | ----- | --------------------------------------------------------------------------- |
+| `get_guide`        | read  | How the studio works and how to guide the player — read first               |
 | `get_studio_state` | read  | Mode, colored characters (regions, colors, progress, position), tool, scene |
 | `list_sketches`    | read  | Sketch catalog with difficulty                                              |
 | `list_motions`     | read  | Motion presets, primitives, body parts, scene options                       |
@@ -34,6 +35,7 @@ Deploys the static build to Cloudflare Workers Static Assets.
 | `pick_sketch`      | write | Put a sketch on the canvas                                                  |
 | `set_tool`         | write | Change brush and color (never paints)                                       |
 | `apply_motion`     | write | Animate a character with a preset or composed steps                         |
+| `apply_motions`    | write | Animate up to three characters in one call                                  |
 | `arrange_scene`    | write | Place, time, weather and character positions                                |
 
 ## License
