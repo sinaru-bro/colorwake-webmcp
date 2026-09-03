@@ -133,7 +133,7 @@ export function PalettePanel() {
           Let&apos;s play with my friends!
         </button>
         {agent.support === "native" && canPlay && (
-          <span className="play-dock__hint">or just say &quot;Let&apos;s play!&quot;</span>
+          <span className="play-dock__hint">or just tell your AI &quot;Let&apos;s play!&quot;</span>
         )}
       </div>
     </>
