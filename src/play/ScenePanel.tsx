@@ -12,6 +12,39 @@ import { SCENE_ICONS } from "./sceneIcons";
 /** Labels too long for one line in the fixed swipe box. */
 const SPLIT_LABELS: Record<string, [string, string]> = { Thunderstorm: ["Thunder", "Storm"] };
 
+/** One scene axis as a chip grid for larger screens. */
+function SceneChips({
+  label,
+  axis,
+  options,
+  selected,
+  onPick,
+}: {
+  label: string;
+  axis: string;
+  options: { id: string; label: string }[];
+  selected: string | null;
+  onPick: (id: string) => void;
+}) {
+  return (
+    <section className="side__sec">
+      <span className="side__label">{label}</span>
+      <div className="chips">
+        {options.map((o) => (
+          <SceneChip
+            key={o.id}
+            id={o.id}
+            label={o.label}
+            on={selected === o.id}
+            flashKey={`${axis}:${o.id}`}
+            onClick={() => onPick(o.id)}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /** One scene axis as a swipe row for small screens: neighbours peek, the centred one is picked. */
 function SceneSwipe({
   label,
@@ -91,51 +124,27 @@ export function ScenePanel() {
         </>
       ) : (
         <>
-          <section className="side__sec">
-            <span className="side__label">Where</span>
-            <div className="chips">
-              {PLACES.map((p) => (
-                <SceneChip
-                  key={p.id}
-                  id={p.id}
-                  label={p.label}
-                  on={scene.place === p.id}
-                  flashKey={`place:${p.id}`}
-                  onClick={() => arrangeScene({ place: p.id as PlaceId })}
-                />
-              ))}
-            </div>
-          </section>
-          <section className="side__sec">
-            <span className="side__label">When</span>
-            <div className="chips">
-              {TIMES.map((t) => (
-                <SceneChip
-                  key={t.id}
-                  id={t.id}
-                  label={t.label}
-                  on={scene.time === t.id}
-                  flashKey={`time:${t.id}`}
-                  onClick={() => arrangeScene({ time: t.id as TimeId })}
-                />
-              ))}
-            </div>
-          </section>
-          <section className="side__sec">
-            <span className="side__label">Weather</span>
-            <div className="chips">
-              {WEATHERS.map((w) => (
-                <SceneChip
-                  key={w.id}
-                  id={w.id}
-                  label={w.label}
-                  on={scene.weather === w.id}
-                  flashKey={`weather:${w.id}`}
-                  onClick={() => arrangeScene({ weather: w.id as WeatherId })}
-                />
-              ))}
-            </div>
-          </section>
+          <SceneChips
+            label="Where"
+            axis="place"
+            options={PLACES}
+            selected={scene.place}
+            onPick={(id) => arrangeScene({ place: id as PlaceId })}
+          />
+          <SceneChips
+            label="When"
+            axis="time"
+            options={TIMES}
+            selected={scene.time}
+            onPick={(id) => arrangeScene({ time: id as TimeId })}
+          />
+          <SceneChips
+            label="Weather"
+            axis="weather"
+            options={WEATHERS}
+            selected={scene.weather}
+            onPick={(id) => arrangeScene({ weather: id as WeatherId })}
+          />
         </>
       )}
       <MyFriends />

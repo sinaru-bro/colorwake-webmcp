@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { sketchById } from "../content/sketches/catalog";
 import { SketchSurface } from "../render/SketchSurface";
 import { colorAnother, removeCharacter, selectCharacter, toggleOnStage } from "../state/actions";
-import { displayName } from "../state/selectors";
+import { displayName, newestFirst } from "../state/selectors";
 import { useStudio } from "../state/store";
 import { LIMITS } from "../state/types";
 import { useUi } from "../state/ui";
@@ -25,9 +25,7 @@ export function MyFriends() {
   const mode = useStudio((s) => s.mode);
   const pulse = useUi((s) => s.notice?.at === "friends");
   const playing = mode === "play";
-  const saved = characters;
-  const total = characters.length;
-  const newestFirst = [...saved].reverse().sort((a, b) => b.createdAt - a.createdAt);
+  const friends = newestFirst(characters);
   const [armed, setArmed] = useState<string | null>(null);
   const holdId = useRef<string | null>(null);
   const swallowClick = useRef(false);
@@ -36,7 +34,7 @@ export function MyFriends() {
     setArmed(holdId.current);
   });
 
-  const armedId = armed && saved.some((c) => c.id === armed) ? armed : null;
+  const armedId = armed && characters.some((c) => c.id === armed) ? armed : null;
 
   useEffect(() => {
     if (!armedId) return;
@@ -53,13 +51,13 @@ export function MyFriends() {
 
   const phone = usePhone();
   const land = useLandscape();
-  const add = (phone || land) && total < LIMITS.maxCharacters;
-  const blank = newestFirst.length === 0 && !add;
+  const add = (phone || land) && characters.length < LIMITS.maxCharacters;
+  const blank = friends.length === 0 && !add;
   return (
     <section className={`side__sec side__sec--works${pulse ? " side__sec--pulse" : ""}`}>
       <div className="side__row">
         <span className="side__label">
-          My friends ({saved.length}/{LIMITS.maxCharacters})
+          My friends ({characters.length}/{LIMITS.maxCharacters})
         </span>
         {playing && <span className="works__hint">{LIMITS.maxOnStage} friends at a time — tap to swap</span>}
       </div>
@@ -75,7 +73,7 @@ export function MyFriends() {
             +
           </button>
         )}
-        {newestFirst.map((c) => {
+        {friends.map((c) => {
           const sketch = sketchById(c.sketchId);
           if (!sketch) return null;
           const on = playing ? cast.includes(c.id) : c.id === activeId;

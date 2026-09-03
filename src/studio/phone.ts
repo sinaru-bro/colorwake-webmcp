@@ -35,3 +35,12 @@ export function useLandscape(): boolean {
 export function usePadLandscape(): boolean {
   return useMedia(PAD_LANDSCAPE);
 }
+
+/** True on any compact layout — portrait phone or pad, or landscape — live with rotation. */
+export function useCompact(): boolean {
+  const phone = usePhone();
+  const pad = usePad();
+  const landscape = useLandscape();
+  const padLandscape = usePadLandscape();
+  return phone || pad || landscape || padLandscape;
+}

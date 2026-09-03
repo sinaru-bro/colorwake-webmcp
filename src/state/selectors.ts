@@ -4,9 +4,11 @@ import {
   ANCHORS,
   type Anchor,
   type Character,
+  type Paint,
   type Position,
   type Scene,
   type SceneAxis,
+  type Sketch,
   type StudioState,
 } from "./types";
 
@@ -83,9 +85,19 @@ export function nearestAnchor(p: Position): Anchor {
   return best;
 }
 
-/** Pictures in My friends: everything except the one still on the canvas. */
-export function savedCharacters(s: StudioState): Character[] {
-  return s.mode === "color" ? s.characters.filter((c) => c.id !== s.activeCharacterId) : s.characters;
+/** Pictures newest first; the reverse keeps same-moment pictures newest-first through the stable sort. */
+export function newestFirst(characters: Character[]): Character[] {
+  return [...characters].reverse().sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/** The two newest pictures that still have a sketch, front first, for the stacked thumbnails. */
+export function newestStack(characters: Character[]): { id: string; sketch: Sketch; paint: Paint }[] {
+  return newestFirst(characters)
+    .slice(0, 2)
+    .flatMap((c) => {
+      const sketch = sketchById(c.sketchId);
+      return sketch ? [{ id: c.id, sketch, paint: c.paint }] : [];
+    });
 }
 
 /** Characters on the play screen, in creation order. */

@@ -1,17 +1,9 @@
 import { RIGS } from "../content/rigs";
 import { SKETCH_LIST } from "../content/sketches/catalog";
 import { SketchSurface } from "../render/SketchSurface";
-import { pickSketch } from "../state/actions";
+import { pickSketchOrNotice } from "../state/actions";
 import { useStudio } from "../state/store";
-import { LIMITS, type Paint } from "../state/types";
-import { ui } from "../state/ui";
-
-const EMPTY_PAINT: Paint = { fills: {}, strokes: [] };
-const FULL_NOTICE = {
-  title: "My friends is full!",
-  hint: "Hold a picture there to make room",
-  at: "friends",
-} as const;
+import { EMPTY_PAINT, LIMITS } from "../state/types";
 
 export function SketchStrip() {
   const mode = useStudio((s) => s.mode);
@@ -32,10 +24,7 @@ export function SketchStrip() {
                   key={sketch.id}
                   type="button"
                   className={`card${activeSketch === sketch.id ? " card--on" : ""}${full ? " card--dim" : ""}`}
-                  onClick={() => {
-                    const res = pickSketch(sketch.id);
-                    if (!res.ok && res.code === "tray_full") ui.notice(FULL_NOTICE);
-                  }}
+                  onClick={() => pickSketchOrNotice(sketch.id)}
                   aria-label={sketch.title}
                 >
                   <span className="card__thumb">

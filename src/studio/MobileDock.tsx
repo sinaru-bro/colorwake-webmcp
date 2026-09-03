@@ -1,26 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { MyFriends } from "../app/MyFriends";
-import { SKETCH_LIST, sketchById } from "../content/sketches/catalog";
+import { SKETCH_LIST } from "../content/sketches/catalog";
 import { colorHex } from "../lib/color";
 import { ScenePanel } from "../play/ScenePanel";
 import { PalettePanel, ToolSections } from "./PalettePanel";
 import { SCENE_ICONS } from "../play/sceneIcons";
 import { ToolIcon } from "../render/icons";
 import { SketchSurface } from "../render/SketchSurface";
-import { enterPlay, pickSketch } from "../state/actions";
-import { coloredCharacters } from "../state/selectors";
+import { enterPlay, pickSketchOrNotice } from "../state/actions";
+import { coloredCharacters, newestStack } from "../state/selectors";
 import { useStudio } from "../state/store";
-import type { Paint } from "../state/types";
-import { ui, useUi } from "../state/ui";
+import { EMPTY_PAINT } from "../state/types";
+import { useUi } from "../state/ui";
 import { usePad, usePhone } from "./phone";
 import { Swipe } from "./Swipe";
-
-const EMPTY_PAINT: Paint = { fills: {}, strokes: [] };
-const FULL_NOTICE = {
-  title: "My friends is full!",
-  hint: "Hold a picture there to make room",
-  at: "friends",
-} as const;
 
 /** Full-canvas sketch browser: one big picture, faint neighbours peeking; swipe or tap a side to browse, tap the middle to start coloring. */
 export function MobileSketchBrowser() {
@@ -35,10 +28,6 @@ export function MobileSketchBrowser() {
   };
   const prev = SKETCH_LIST[idx - 1];
   const next = SKETCH_LIST[idx + 1];
-  const pick = (id: string) => {
-    const res = pickSketch(id);
-    if (!res.ok && res.code === "tray_full") ui.notice(FULL_NOTICE);
-  };
   return (
     <div className="mbrowse">
       <Swipe
@@ -59,7 +48,7 @@ export function MobileSketchBrowser() {
             </>
           ),
         }))}
-        onPick={pick}
+        onPick={pickSketchOrNotice}
         onCenter={(id) => setBrowse(id)}
       />
       {prev && (
@@ -120,14 +109,7 @@ export function MobileDock() {
   if (!phone && !pad) return null;
   const coloring = mode === "color";
   const close = () => setOpen(false);
-  const stack = [...characters]
-    .reverse()
-    .sort((a, b) => b.createdAt - a.createdAt)
-    .slice(0, 2)
-    .flatMap((c) => {
-      const sketch = sketchById(c.sketchId);
-      return sketch ? [{ id: c.id, sketch, paint: c.paint }] : [];
-    });
+  const stack = newestStack(characters);
   const front = stack[0];
   const back = stack[1];
   return (

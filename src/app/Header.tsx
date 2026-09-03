@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useUi } from "../state/ui";
-import { useLandscape, usePad, usePadLandscape, usePhone } from "../studio/phone";
+import { useCompact } from "../studio/phone";
 import { TOOL_NAMES } from "../webmcp/toolNames";
 
 function AgentBadge() {
@@ -8,11 +8,7 @@ function AgentBadge() {
   const activity = useUi((s) => s.activity);
   const storageError = useUi((s) => s.storageError);
   const [open, setOpen] = useState(false);
-  const phone = usePhone();
-  const pad = usePad();
-  const land = useLandscape();
-  const padLand = usePadLandscape();
-  const compact = phone || pad || land || padLand;
+  const compact = useCompact();
   const status = storageError
     ? { cls: " badge--warn", text: "Not saving", detail: "Storage is full — new changes may be lost" }
     : agent.support === "native"

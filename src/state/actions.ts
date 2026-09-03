@@ -104,6 +104,18 @@ export function pickSketch(sketchId: string): PickResult {
   return { ok: true, character: created, replaced: false, switchedTo };
 }
 
+const FULL_NOTICE = {
+  title: "My friends is full!",
+  hint: "Hold a picture there to make room",
+  at: "friends",
+} as const;
+
+/** Starts coloring a sketch; when the tray is full, points at My friends instead. */
+export function pickSketchOrNotice(sketchId: string): void {
+  const res = pickSketch(sketchId);
+  if (!res.ok && res.code === "tray_full") ui.notice(FULL_NOTICE);
+}
+
 export function fillRegion(regionId: string, color?: string): boolean {
   const s = getState();
   const active = activeCharacter(s);

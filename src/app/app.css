@@ -985,57 +985,6 @@
 
 /* dialogs */
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(46, 42, 38, 0.28);
-  display: grid;
-  place-items: center;
-  z-index: 30;
-}
-
-.modal__box {
-  width: min(420px, 92vw);
-  background: var(--panel);
-  border-radius: 18px;
-  padding: 22px;
-  box-shadow: 0 10px 40px rgba(46, 42, 38, 0.18);
-}
-
-.modal__box h2 {
-  margin: 0 0 6px;
-  font-family: var(--display);
-  font-size: 22px;
-}
-
-.modal__box p {
-  margin: 0 0 16px;
-  color: var(--muted);
-}
-
-.modal__btns {
-  display: flex;
-  gap: 10px;
-}
-
-.modal__btn {
-  flex: 1;
-  height: 52px;
-  border: 2px solid var(--line);
-  border-radius: 14px;
-  background: var(--panel);
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.modal__btn--primary {
-  background: var(--acc);
-  color: #fff;
-  border-color: var(--acc);
-}
-
 .notice {
   position: absolute;
   top: 14px;
@@ -1456,7 +1405,6 @@
   }
   .side__sec--works {
     order: 2;
-    flex: 0 1 auto;
   }
   .works {
     flex: none;
@@ -1712,10 +1660,8 @@
     background: var(--bg);
   }
   .mbar .play-dock {
-    position: static;
     width: 100%;
     margin: 0;
-    outline: 0;
     background: none;
   }
   .msheet {
@@ -1766,8 +1712,6 @@
     align-items: stretch;
   }
   .msheet__panel .works {
-    flex: none;
-    height: auto;
     max-height: none;
     overflow: visible;
     justify-content: start;
@@ -1804,10 +1748,7 @@
   .msheet__panel .play-dock {
     margin-top: auto;
     position: sticky;
-    bottom: 0;
-    outline: 0;
     background: var(--panel);
-    min-height: 0;
     padding: 12px 0 calc(10px + env(safe-area-inset-bottom));
   }
   .msheet__panel .play-dock__hint {
@@ -1852,17 +1793,9 @@
     max-height: calc(100dvh - 82px);
     padding: 18px 16px 20px;
   }
-  .msheet__panel--friends .side__sec--works {
-    flex: none;
-  }
   .msheet__panel--friends .works {
-    flex: none;
-    height: auto;
-    max-height: none;
-    overflow: visible;
     grid-template-columns: repeat(4, 64px);
     grid-auto-rows: 64px;
-    justify-content: start;
   }
   .msheet__panel--friends .work {
     width: 64px;

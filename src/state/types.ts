@@ -86,6 +86,9 @@ export interface Paint {
   strokes: Stroke[];
 }
 
+/** A blank paint for rendering uncolored sketches. */
+export const EMPTY_PAINT: Paint = { fills: {}, strokes: [] };
+
 export interface Character {
   id: string;
   sketchId: string;

@@ -1,12 +1,11 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { MyFriends } from "../app/MyFriends";
 import { PALETTE } from "../content/palette";
-import { sketchById } from "../content/sketches/catalog";
 import { colorHex, isCustomColor, isLightColor } from "../lib/color";
 import { ToolIcon } from "../render/icons";
 import { SketchSurface } from "../render/SketchSurface";
 import { enterPlay, setTool } from "../state/actions";
-import { coloredCharacters } from "../state/selectors";
+import { coloredCharacters, newestStack } from "../state/selectors";
 import { useStudio } from "../state/store";
 import type { StrokeSize, ToolId } from "../state/types";
 import { useUi } from "../state/ui";
@@ -154,14 +153,7 @@ export function PalettePanel() {
 export function PaletteRail() {
   const tool = useStudio((s) => s.tool);
   const characters = useStudio((s) => s.characters);
-  const stack = [...characters]
-    .reverse()
-    .sort((a, b) => b.createdAt - a.createdAt)
-    .slice(0, 2)
-    .flatMap((c) => {
-      const sketch = sketchById(c.sketchId);
-      return sketch ? [{ id: c.id, sketch, paint: c.paint }] : [];
-    });
+  const stack = newestStack(characters);
   const front = stack[0];
   const back = stack[1];
   return (
