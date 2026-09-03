@@ -1,19 +1,5 @@
 import type { Preset } from "../../../state/types";
-import {
-  bounce,
-  danceVariants,
-  fade,
-  flyVariants,
-  lean,
-  many,
-  move,
-  nod,
-  one,
-  scale,
-  spin,
-  swimVariants,
-  wave,
-} from "./shared";
+import { bounce, danceVariants, flyVariants, lean, many, move, nod, one, swimVariants, wave } from "./shared";
 
 export const SWIMMER_PRESETS: Preset[] = [
   one({
@@ -42,15 +28,6 @@ export const SWIMMER_PRESETS: Preset[] = [
     loop: false,
     steps: [move(0, 300, "line", 1800), lean(0, 35, 1800), wave("tail-fin", 30, 3, 1800)],
   }),
-  one({
-    id: "leap",
-    rig: "swimmer",
-    label: "Leap",
-    sayings: ["jump out", "splash"],
-    mode: "parallel",
-    loop: 2,
-    steps: [bounce(200, 900, 0.05), spin(1, 900), wave("fin-l", 20, 2, 900)],
-  }),
   many(
     { id: "fly", rig: "swimmer", label: "Fly", sayings: ["float", "soar", "flying fish"] },
     flyVariants({ rotate: 20 }, [
@@ -68,22 +45,4 @@ export const SWIMMER_PRESETS: Preset[] = [
       nod("head", 6, 840),
     ]),
   ),
-  one({
-    id: "twirl",
-    rig: "swimmer",
-    label: "Twirl",
-    sayings: ["twist", "pirouette"],
-    mode: "parallel",
-    loop: false,
-    steps: [spin(2, 1200), scale(1, 1.1, 1200), wave("tail-fin", 30, 3, 1200)],
-  }),
-  one({
-    id: "hide",
-    rig: "swimmer",
-    label: "Hide",
-    sayings: ["shrink", "peekaboo", "disappear"],
-    mode: "parallel",
-    loop: false,
-    steps: [fade(0.15, 700), scale(1, 0.7, 700), move(0, 120, "line", 700), wave("tail-fin", 15, 1, 700)],
-  }),
 ];

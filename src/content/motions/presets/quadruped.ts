@@ -3,7 +3,6 @@ import {
   bounce,
   danceVariants,
   flyVariants,
-  jumpVariants,
   lean,
   many,
   move,
@@ -75,10 +74,6 @@ export const QUADRUPED_PRESETS: Preset[] = [
       move(1000, 0, "line", 2400),
     ],
   }),
-  many(
-    { id: "jump", rig: "quadruped", label: "Jump", sayings: ["hop", "leap", "pounce"] },
-    jumpVariants([wave("tail", 20, 1, 600)]),
-  ),
   one({
     id: "wag",
     rig: "quadruped",

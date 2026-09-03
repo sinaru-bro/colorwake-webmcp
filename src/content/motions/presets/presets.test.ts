@@ -17,19 +17,27 @@ import {
 const rigs = RIGS.map((r) => r.id);
 
 describe("preset catalog", () => {
-  it("has a full preset set per body type, six universal presets and stop", () => {
-    expect(PRESETS).toHaveLength(45);
+  it("has a lean preset set per body type, six universal presets and stop", () => {
+    expect(PRESETS).toHaveLength(34);
     expect(UNIVERSAL_IDS.sort()).toEqual(["grow", "hide", "jump", "spin", "stop", "wiggle"]);
-    for (const rig of rigs)
-      expect(PRESETS.filter((p) => p.rig === rig)).toHaveLength(rig === "biped" ? 7 : 8);
+    const counts: Record<string, number> = { quadruped: 7, swimmer: 5, winged: 5, biped: 6, object: 5 };
+    for (const rig of rigs) expect(PRESETS.filter((p) => p.rig === rig)).toHaveLength(counts[rig]);
     expect(UNIVERSAL_IDS).toContain(FALLBACK_PRESET_ID);
     expect(UNIVERSAL_IDS).toContain(STOP_PRESET_ID);
   });
-  it("gives every body type its own swim, fly, dance and greet", () => {
+  it("gives every body type its shared moves plus a signature move", () => {
     for (const rig of rigs) {
       for (const id of ["swim", "fly", "dance", "greet"])
         expect(findPreset(id, rig)?.source, `${rig}/${id}`).toBe("rig");
     }
+    const signatures: Record<string, string> = {
+      quadruped: "wag",
+      swimmer: "dive",
+      winged: "peck",
+      biped: "cheer",
+      object: "launch",
+    };
+    for (const rig of rigs) expect(findPreset(signatures[rig], rig)?.source, rig).toBe("rig");
   });
   it("keeps ids unique within a rig and every variant within limits", () => {
     for (const rig of [...rigs, "any"]) {
@@ -107,13 +115,20 @@ describe("lookup", () => {
     expect(findPreset("spin", "quadruped")?.source).toBe("universal");
     expect(findPreset("fly", "winged")?.source).toBe("rig");
     expect(findPreset("wag", "swimmer")?.source).toBe("other");
-    expect(findPreset("jump", "biped")?.source).toBe("rig");
+    expect(findPreset("jump", "biped")?.source).toBe("universal");
     expect(findPreset("nope", "biped")).toBeNull();
   });
   it("lists rig presets plus universal ones", () => {
     for (const rig of rigs as RigId[]) {
       const list = presetsForRig(rig);
-      expect(list).toHaveLength(rig === "biped" ? 13 : 14);
+      const counts: Record<string, number> = {
+        quadruped: 13,
+        swimmer: 11,
+        winged: 11,
+        biped: 12,
+        object: 11,
+      };
+      expect(list).toHaveLength(counts[rig]);
       expect(list.map((p) => p.id)).toContain("stop");
     }
   });
