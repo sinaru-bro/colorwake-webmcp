@@ -10,7 +10,7 @@ import { useStudio } from "../state/store";
 import { LIMITS, type ToolState } from "../state/types";
 import { useUi } from "../state/ui";
 import { MobileSketchBrowser } from "./MobileDock";
-import { usePhone } from "./phone";
+import { useLandscape, usePhone } from "./phone";
 
 const RING_R = 37;
 const CIRC = 2 * Math.PI * RING_R;
@@ -112,6 +112,7 @@ export function Canvas() {
   const canvas = useRef<HTMLDivElement>(null);
   const size = useSquareSize(host);
   const phone = usePhone();
+  const land = useLandscape();
   const state = useStudio((s) => s);
   const active = activeCharacter(state);
   const sketch = active ? sketchById(active.sketchId) : undefined;
@@ -160,7 +161,7 @@ export function Canvas() {
             <>
               <SketchSurface
                 key={active.id}
-                className={phone ? "sketch-grow" : undefined}
+                className={phone || land ? "sketch-grow" : undefined}
                 sketch={sketch}
                 paint={active.paint}
                 interactive
@@ -178,7 +179,7 @@ export function Canvas() {
                 <span className="canvas__hint">Hold a picture there to make room</span>
               </div>
             </div>
-          ) : phone ? (
+          ) : phone || land ? (
             <MobileSketchBrowser />
           ) : (
             <div className="canvas__empty">
@@ -202,9 +203,9 @@ export function Canvas() {
             <Icon name="undo" size={28} />
           </button>
         )}
-        {phone && doneUi}
+        {(phone || land) && doneUi}
       </div>
-      {!phone && doneUi}
+      {!phone && !land && doneUi}
     </div>
   );
 }

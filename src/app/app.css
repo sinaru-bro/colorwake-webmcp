@@ -1452,6 +1452,124 @@
   }
 }
 
+/* Swipe rows and the in-canvas sketch browser, shared by phone portrait and phone landscape. */
+@media (max-aspect-ratio: 1/1) and (max-width: 600px), (orientation: landscape) and (max-height: 600px) {
+  .mswipe {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 8px calc(50% - var(--half, 40px));
+    scrollbar-width: none;
+  }
+  .mswipe::-webkit-scrollbar {
+    display: none;
+  }
+  .mswipe--page {
+    gap: 0;
+    padding: 8px 0;
+  }
+  .mswipe--page .mswipe__item {
+    min-width: 100%;
+    gap: 6px;
+    font-size: 14px;
+  }
+  .mswipe--page .mswipe__item--on {
+    transform: none;
+  }
+  .mswipe__item {
+    flex: none;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: calc(var(--half, 40px) * 2);
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: 700 11px var(--display);
+    color: var(--muted);
+    transition:
+      transform 0.2s ease,
+      color 0.2s ease;
+  }
+  .mswipe__item--on {
+    transform: scale(1.14);
+    color: var(--acc);
+  }
+  .mswipe__thumb {
+    width: 68px;
+    height: 68px;
+  }
+  .mswipe__thumb svg {
+    width: 100%;
+    height: 100%;
+  }
+  .mbrowse {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+  .mbrowse .mswipe__thumb {
+    width: min(44vw, 200px);
+    height: min(44vw, 200px);
+  }
+  .mbrowse__side {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 52px;
+    border: 0;
+    background: none;
+    padding: 0;
+    opacity: 0.45;
+    color: var(--muted);
+    cursor: pointer;
+    z-index: 2;
+  }
+  .mbrowse__side--prev {
+    left: 6px;
+  }
+  .mbrowse__side--next {
+    right: 6px;
+  }
+  .mbrowse__side:active {
+    opacity: 0.7;
+  }
+  .mbrowse__ghost {
+    width: 46px;
+    height: 46px;
+  }
+  .mbrowse__ghost svg {
+    width: 100%;
+    height: 100%;
+  }
+  .mbrowse__tri {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+  .sketch-grow {
+    animation: sketch-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+    transform-origin: 50% 50%;
+  }
+  @keyframes sketch-in {
+    from {
+      transform: scale(0.72);
+    }
+  }
+}
+
 /* Phone portrait: the canvas owns the screen; choices swipe like photos. */
 @media (max-aspect-ratio: 1/1) and (max-width: 600px) {
   .side,
@@ -1532,57 +1650,6 @@
   }
   .mdock-fab__emoji {
     font-size: 24px;
-  }
-  .mbrowse {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 6px;
-  }
-  .mbrowse .mswipe__thumb {
-    width: min(44vw, 200px);
-    height: min(44vw, 200px);
-  }
-  .mbrowse__side {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    width: 52px;
-    border: 0;
-    background: none;
-    padding: 0;
-    opacity: 0.45;
-    color: var(--muted);
-    cursor: pointer;
-    z-index: 2;
-  }
-  .mbrowse__side--prev {
-    left: 6px;
-  }
-  .mbrowse__side--next {
-    right: 6px;
-  }
-  .mbrowse__side:active {
-    opacity: 0.7;
-  }
-  .mbrowse__ghost {
-    width: 46px;
-    height: 46px;
-  }
-  .mbrowse__ghost svg {
-    width: 100%;
-    height: 100%;
-  }
-  .mbrowse__tri {
-    width: 14px;
-    height: 14px;
-    fill: currentColor;
   }
   .mbar {
     position: fixed;
@@ -1701,30 +1768,6 @@
   .msheet__panel .play-dock {
     margin-top: auto;
   }
-  .mswipe {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 8px calc(50% - var(--half, 40px));
-    scrollbar-width: none;
-  }
-  .mswipe::-webkit-scrollbar {
-    display: none;
-  }
-  .mswipe--page {
-    gap: 0;
-    padding: 8px 0;
-  }
-  .mswipe--page .mswipe__item {
-    min-width: 100%;
-    gap: 6px;
-    font-size: 14px;
-  }
-  .mswipe--page .mswipe__item--on {
-    transform: none;
-  }
   .mswipe--start {
     padding: 8px calc(100% - 84px) 8px 12px;
     scroll-padding-left: 12px;
@@ -1734,45 +1777,6 @@
   }
   .mswipe--start .mswipe__item--on {
     transform-origin: left center;
-  }
-  .sketch-grow {
-    animation: sketch-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
-    transform-origin: 50% 50%;
-  }
-  @keyframes sketch-in {
-    from {
-      transform: scale(0.72);
-    }
-  }
-  .mswipe__item {
-    flex: none;
-    scroll-snap-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    min-width: calc(var(--half, 40px) * 2);
-    border: 0;
-    background: transparent;
-    padding: 0;
-    font: 700 11px var(--display);
-    color: var(--muted);
-    transition:
-      transform 0.2s ease,
-      color 0.2s ease;
-  }
-  .mswipe__item--on {
-    transform: scale(1.14);
-    color: var(--acc);
-  }
-  .mswipe__thumb {
-    width: 68px;
-    height: 68px;
-  }
-  .mswipe__thumb svg {
-    width: 100%;
-    height: 100%;
   }
   .msheet__panel--tools .side__sec {
     align-items: stretch;
@@ -1797,5 +1801,59 @@
   from {
     transform: translateX(48px);
     opacity: 0.5;
+  }
+}
+
+/* Phone landscape: the desktop frame, but the strip gives way to the in-canvas browser and the side panel scrolls as one. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .strip,
+  .shell--enter .strip--hidden,
+  .shell--leave .strip {
+    display: none;
+  }
+  .works {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    animation: none;
+  }
+  .side__sec--works {
+    flex: 0 0 auto;
+  }
+  .play-dock {
+    position: static;
+    outline: 0;
+    background: none;
+    min-height: 0;
+  }
+  .play-dock__hint {
+    display: none;
+  }
+  .mbrowse .mswipe__thumb {
+    width: min(38vh, 200px);
+    height: min(38vh, 200px);
+  }
+  .undo {
+    right: 60px;
+    width: 40px;
+    height: 40px;
+  }
+  .undo svg {
+    width: 20px;
+    height: 20px;
+  }
+  .done {
+    right: 12px;
+    bottom: 12px;
+    width: 40px;
+    height: 40px;
+  }
+  .done svg {
+    width: 22px;
+    height: 22px;
+  }
+  .done__ring {
+    display: none;
   }
 }

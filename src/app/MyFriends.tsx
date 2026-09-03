@@ -6,7 +6,7 @@ import { displayName } from "../state/selectors";
 import { useStudio } from "../state/store";
 import { LIMITS } from "../state/types";
 import { useUi } from "../state/ui";
-import { usePhone } from "../studio/phone";
+import { useLandscape, usePhone } from "../studio/phone";
 import { useHold } from "./useHold";
 
 const ARM_HOLD_MS = 500;
@@ -52,7 +52,8 @@ export function MyFriends() {
   }, [armedId]);
 
   const phone = usePhone();
-  const add = phone && total < LIMITS.maxCharacters;
+  const land = useLandscape();
+  const add = (phone || land) && total < LIMITS.maxCharacters;
   const blank = newestFirst.length === 0 && !add;
   return (
     <section className={`side__sec side__sec--works${pulse ? " side__sec--pulse" : ""}`}>
