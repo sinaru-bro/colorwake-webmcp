@@ -111,7 +111,14 @@ export const PLACES: PlaceDef[] = [
     label: "Space",
     sayings: ["outer space", "moon", "planets", "stars", "galaxy"],
     horizon: HORIZON,
-    elements: ["deep space with stars", "ringed planet", "Earth", "UFO", "moon ground with craters", "flag"],
+    elements: [
+      "deep space with stars",
+      "ringed planet",
+      "spinning Earth",
+      "drifting UFO",
+      "shooting comet",
+      "moon ground with craters",
+    ],
   },
   {
     id: "school",

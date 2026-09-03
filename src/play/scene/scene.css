@@ -470,6 +470,83 @@
   }
 }
 
+.comet {
+  opacity: 0;
+  animation: comet-fall 9s linear infinite;
+}
+
+@keyframes comet-fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  2% {
+    opacity: 0.9;
+  }
+  11% {
+    opacity: 0.9;
+  }
+  13% {
+    opacity: 0;
+    transform: translate(-540px, 310px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-540px, 310px);
+  }
+}
+
+.comet--far {
+  animation: comet-fall-far 13s linear infinite;
+  animation-delay: 5s;
+}
+
+@keyframes comet-fall-far {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  2% {
+    opacity: 0.55;
+  }
+  8% {
+    opacity: 0.55;
+  }
+  10% {
+    opacity: 0;
+    transform: translate(-180px, 120px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-180px, 120px);
+  }
+}
+
+.spin-slow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin-slow 22s linear infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ufo-drift {
+  animation: ufo-drift 8s ease-in-out infinite alternate;
+}
+
+@keyframes ufo-drift {
+  from {
+    transform: translateX(-130px);
+  }
+  to {
+    transform: translateX(130px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .play .sky *,
   .play .place *,

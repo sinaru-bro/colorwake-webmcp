@@ -60,30 +60,40 @@ export const space: PlaceArt = {
         />
       </Group>
       <Group x={1250} y={180}>
-        <circle r="70" fill="#5AA9E6" />
-        <path
-          d="M-40 -30 C-10 -50 20 -30 10 -5 C0 15 -40 10 -40 -30 Z M20 20 C40 10 60 30 40 50 C25 55 15 35 20 20 Z"
-          fill="#9BE38A"
-        />
+        <g className="spin-slow">
+          <circle r="70" fill="#5AA9E6" />
+          <path
+            d="M-40 -30 C-10 -50 20 -30 10 -5 C0 15 -40 10 -40 -30 Z M20 20 C40 10 60 30 40 50 C25 55 15 35 20 20 Z"
+            fill="#9BE38A"
+          />
+        </g>
         <circle r="70" fill="none" stroke="#FFFFFF" strokeWidth="6" opacity="0.4" />
       </Group>
-      <path d="M700 520 L1000 400" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" opacity="0.5" />
-      <circle cx="1000" cy="400" r="9" fill="#FFF6C8" />
-      <Group x={800} y={300} className="bob">
-        <ellipse cx="0" cy="0" rx="70" ry="20" fill="#B9C4D8" />
-        <path d="M-40 -8 A40 30 0 0 1 40 -8 Z" fill="#9BE38A" opacity="0.9" />
-        {[-40, 0, 40].map((x) => (
-          <circle key={x} cx={x} cy="4" r="5" fill="#FFD166" />
-        ))}
+      <Group x={1420} y={110}>
+        <g className="comet">
+          <path d="M260 -150 L0 0" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" opacity="0.5" />
+          <circle r="9" fill="#FFF6C8" />
+        </g>
+      </Group>
+      <Group x={720} y={50}>
+        <g className="comet comet--far">
+          <path d="M90 -60 L0 0" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" opacity="0.4" />
+          <circle r="5" fill="#FFF6C8" />
+        </g>
+      </Group>
+      <Group x={800} y={300} className="ufo-drift">
+        <g className="bob">
+          <ellipse cx="0" cy="0" rx="70" ry="20" fill="#B9C4D8" />
+          <path d="M-40 -8 A40 30 0 0 1 40 -8 Z" fill="#9BE38A" opacity="0.9" />
+          {[-40, 0, 40].map((x) => (
+            <circle key={x} cx={x} cy="4" r="5" fill="#FFD166" />
+          ))}
+        </g>
       </Group>
     </>
   ),
   near: () => (
     <>
-      <Group x={1000} y={936}>
-        <rect x="-5" y="-400" width="10" height="400" fill="#D8DEE9" />
-        <path d="M5 -400 H175 V-290 H5 Z" fill="#F6F7FB" />
-      </Group>
       <Rock x={360} y={936} s={0.8} fill="#A7ADBD" light="#C7CCD8" />
       <Rock x={1520} y={936} s={0.6} fill="#A7ADBD" light="#C7CCD8" />
     </>
