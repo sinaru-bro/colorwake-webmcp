@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { fillRegion, finishPicture, pickSketch, resetAll } from "./actions";
 import { parseSaved } from "./persistence";
 import { getState } from "./store";
+import { DEFAULT_TOOL } from "./types";
 
 function finish(sketchId: string): string {
   const res = pickSketch(sketchId);
@@ -23,5 +24,29 @@ describe("parseSaved", () => {
     const [a] = ["cat", "fish"].map(finish);
     const raw = JSON.stringify({ ...getState(), cast: [a, "gone"] });
     expect(parseSaved(raw)?.cast).toEqual([a]);
+  });
+  it("drops saved characters that would not render", () => {
+    finish("cat");
+    const good = getState().characters[0];
+    const raw = JSON.stringify({
+      ...getState(),
+      characters: [
+        good,
+        { ...good, id: "broken-paint", paint: {} },
+        { ...good, id: "broken-stroke", paint: { fills: {}, strokes: [{}] } },
+        { ...good, id: "broken-position", position: { x: "left" } },
+      ],
+      cast: [good.id, "broken-paint"],
+    });
+    const parsed = parseSaved(raw);
+    expect(parsed?.characters.map((c) => c.id)).toEqual([good.id]);
+    expect(parsed?.cast).toEqual([good.id]);
+  });
+  it("falls back to a sane tool and scene when they are corrupt", () => {
+    finish("cat");
+    const raw = JSON.stringify({ ...getState(), tool: { tool: "laser" }, scene: { place: "moon" } });
+    const parsed = parseSaved(raw);
+    expect(parsed?.tool).toEqual(DEFAULT_TOOL);
+    expect(parsed?.scene.place).toBeNull();
   });
 });
