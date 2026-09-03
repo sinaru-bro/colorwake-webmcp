@@ -9,6 +9,8 @@ import { activeCharacter, isColored, progress } from "../state/selectors";
 import { useStudio } from "../state/store";
 import type { ToolState } from "../state/types";
 import { useUi } from "../state/ui";
+import { MobileSketchBrowser } from "./MobileDock";
+import { usePhone } from "./phone";
 
 const RING_R = 37;
 const CIRC = 2 * Math.PI * RING_R;
@@ -109,6 +111,7 @@ export function Canvas() {
   const host = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLDivElement>(null);
   const size = useSquareSize(host);
+  const phone = usePhone();
   const state = useStudio((s) => s);
   const active = activeCharacter(state);
   const sketch = active ? sketchById(active.sketchId) : undefined;
@@ -132,15 +135,14 @@ export function Canvas() {
               />
               <ToolCursor canvas={canvas} tool={state.tool} scale={(size - CANVAS_PAD * 2) / SKETCH_UNITS} />
             </>
+          ) : phone ? (
+            <MobileSketchBrowser />
           ) : (
             <div className="canvas__empty">
               <div>
-                <span className="only-wide">
-                  Pick a picture below
-                  <br />
-                  <span className="canvas__arrow">↓</span>
-                </span>
-                <span className="only-phone">Tap ↗ to pick a picture</span>
+                Pick a picture below
+                <br />
+                <span className="canvas__arrow">↓</span>
               </div>
             </div>
           )}

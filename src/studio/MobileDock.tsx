@@ -12,8 +12,8 @@ import { coloredCharacters } from "../state/selectors";
 import { useStudio } from "../state/store";
 import type { Paint, StrokeSize, ToolId } from "../state/types";
 import { ui, useUi } from "../state/ui";
+import { usePhone } from "./phone";
 
-const PHONE = "(max-aspect-ratio: 1/1) and (max-width: 600px)";
 const SETTLE_MS = 120;
 const EMPTY_PAINT: Paint = { fills: {}, strokes: [] };
 const FULL_NOTICE = {
@@ -28,23 +28,12 @@ const TOOLS: { id: ToolId; label: string }[] = [
   { id: "fill", label: "Fill" },
 ];
 const SIZES: { id: StrokeSize; dot: number }[] = [
-  { id: "s", dot: 8 },
-  { id: "m", dot: 14 },
-  { id: "l", dot: 20 },
+  { id: "s", dot: 14 },
+  { id: "m", dot: 22 },
+  { id: "l", dot: 32 },
 ];
 const CUSTOM_START = "#ff8a5b";
 const DARK_INK = "#2e2a26";
-
-function usePhone(): boolean {
-  const [phone, setPhone] = useState(() => window.matchMedia(PHONE).matches);
-  useEffect(() => {
-    const mq = window.matchMedia(PHONE);
-    const update = () => setPhone(mq.matches);
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return phone;
-}
 
 interface SwipeItem {
   id: string;
@@ -53,7 +42,7 @@ interface SwipeItem {
   node: ReactNode;
 }
 
-/** One row of choices: swipe to browse, the centred one snaps; tap picks. */
+/** One row of choices, like flipping photos: the centred one is the pick, neighbours peek. */
 function Swipe({
   items,
   selected,
@@ -116,6 +105,46 @@ function Swipe({
   );
 }
 
+/** Full-canvas sketch browser: swipe like photos, then tap the button to start coloring. */
+export function MobileSketchBrowser() {
+  const [browse, setBrowse] = useState("cat");
+  const current = SKETCH_LIST.find((s) => s.id === browse) ?? SKETCH_LIST[0];
+  return (
+    <div className="mbrowse">
+      <Swipe
+        ariaLabel="Pictures"
+        half={100}
+        selected={browse}
+        items={SKETCH_LIST.map((s) => ({
+          id: s.id,
+          label: s.title,
+          on: browse === s.id,
+          node: (
+            <>
+              <span className="mswipe__thumb">
+                <SketchSurface sketch={s} paint={EMPTY_PAINT} />
+              </span>
+              <span>{s.title}</span>
+            </>
+          ),
+        }))}
+        onPick={(id) => setBrowse(id)}
+        onCenter={(id) => setBrowse(id)}
+      />
+      <button
+        type="button"
+        className="mbrowse__go"
+        onClick={() => {
+          const res = pickSketch(current.id);
+          if (!res.ok && res.code === "tray_full") ui.notice(FULL_NOTICE);
+        }}
+      >
+        Color this one!
+      </button>
+    </div>
+  );
+}
+
 function AnyColor() {
   const color = useStudio((s) => s.tool.color);
   const on = isCustomColor(color);
@@ -139,46 +168,15 @@ function AnyColor() {
   );
 }
 
-function ColorSheet({ close }: { close: () => void }) {
+function ToolSheet() {
   const tool = useStudio((s) => s.tool);
-  const activeSketch = useStudio(
-    (s) => s.characters.find((c) => c.id === s.activeCharacterId)?.sketchId ?? null,
-  );
-  const canPlay = useStudio((s) => coloredCharacters(s).length > 0);
-  const agent = useUi((s) => s.agent);
   return (
     <>
-      <section className="msheet__sec">
-        <span className="side__label">Pictures</span>
-        <Swipe
-          ariaLabel="Pictures"
-          half={52}
-          selected={activeSketch}
-          items={SKETCH_LIST.map((s) => ({
-            id: s.id,
-            label: s.title,
-            on: activeSketch === s.id,
-            node: (
-              <>
-                <span className="mswipe__thumb">
-                  <SketchSurface sketch={s} paint={EMPTY_PAINT} />
-                </span>
-                <span>{s.title}</span>
-              </>
-            ),
-          }))}
-          onPick={(id) => {
-            const res = pickSketch(id);
-            if (!res.ok && res.code === "tray_full") ui.notice(FULL_NOTICE);
-            else close();
-          }}
-        />
-      </section>
       <section className="msheet__sec">
         <span className="side__label">Tools</span>
         <Swipe
           ariaLabel="Tools"
-          half={48}
+          half={40}
           selected={tool.tool}
           items={TOOLS.map((t) => ({
             id: t.id,
@@ -186,7 +184,7 @@ function ColorSheet({ close }: { close: () => void }) {
             on: tool.tool === t.id,
             node: (
               <>
-                <ToolIcon name={t.id} size={38} />
+                <ToolIcon name={t.id} size={40} />
                 <span>{t.label}</span>
               </>
             ),
@@ -197,27 +195,26 @@ function ColorSheet({ close }: { close: () => void }) {
       </section>
       <section className="msheet__sec">
         <span className="side__label">Size</span>
-        <div className="sizes">
-          {SIZES.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className={`size${tool.size === s.id ? " size--on" : ""}`}
-              aria-label={`Size ${s.id}`}
-              aria-pressed={tool.size === s.id}
-              onClick={() => setTool({ size: s.id })}
-            >
-              <i style={{ width: s.dot, height: s.dot }} />
-            </button>
-          ))}
-        </div>
+        <Swipe
+          ariaLabel="Size"
+          half={26}
+          selected={tool.size}
+          items={SIZES.map((s) => ({
+            id: s.id,
+            label: `Size ${s.id}`,
+            on: tool.size === s.id,
+            node: <span className="mswipe__sizedot" style={{ width: s.dot, height: s.dot }} />,
+          }))}
+          onPick={(id) => setTool({ size: id as StrokeSize })}
+          onCenter={(id) => setTool({ size: id as StrokeSize })}
+        />
       </section>
       <section className="msheet__sec">
         <span className="side__label">Colors</span>
         <div className="msheet__colors">
           <Swipe
             ariaLabel="Colors"
-            half={30}
+            half={26}
             selected={isCustomColor(tool.color) ? null : tool.color}
             items={PALETTE.map((c) => ({
               id: c.id,
@@ -231,23 +228,6 @@ function ColorSheet({ close }: { close: () => void }) {
           <AnyColor />
         </div>
       </section>
-      <MyFriends />
-      <div className="play-dock">
-        <button
-          type="button"
-          className="play-cta"
-          disabled={!canPlay}
-          onClick={() => {
-            close();
-            enterPlay();
-          }}
-        >
-          Let&apos;s play with my friends!
-        </button>
-        {agent.support === "native" && canPlay && (
-          <span className="play-dock__hint">or just tell your AI &quot;Let&apos;s play!&quot;</span>
-        )}
-      </div>
     </>
   );
 }
@@ -257,7 +237,9 @@ export function MobileDock() {
   const mode = useStudio((s) => s.mode);
   const place = useStudio((s) => s.scene.place);
   const tool = useStudio((s) => s.tool);
-  const noPicture = useStudio((s) => s.activeCharacterId === null);
+  const canPlay = useStudio((s) => coloredCharacters(s).length > 0);
+  const hasActive = useStudio((s) => s.activeCharacterId !== null);
+  const agent = useUi((s) => s.agent);
   const [open, setOpen] = useState(
     () => import.meta.env.DEV && new URLSearchParams(window.location.search).get("sheet") === "1",
   );
@@ -268,8 +250,9 @@ export function MobileDock() {
     <>
       <button
         type="button"
-        className={`mdock-fab${coloring && noPicture ? " mdock-fab--pulse" : ""}`}
-        aria-label={coloring ? "Pictures, tools and colors" : "Scene and friends"}
+        className="mdock-fab"
+        aria-label={coloring ? "Tools and colors" : "Scene and friends"}
+        disabled={coloring && !hasActive}
         onClick={() => setOpen(true)}
       >
         {coloring ? (
@@ -283,10 +266,23 @@ export function MobileDock() {
           </span>
         )}
       </button>
+      {coloring && (
+        <div className="mbar">
+          <MyFriends />
+          <div className="play-dock">
+            <button type="button" className="play-cta" disabled={!canPlay} onClick={() => enterPlay()}>
+              Let&apos;s play with my friends!
+            </button>
+            {agent.support === "native" && canPlay && (
+              <span className="play-dock__hint">or just tell your AI &quot;Let&apos;s play!&quot;</span>
+            )}
+          </div>
+        </div>
+      )}
       {open && (
         <div className="msheet">
           <button type="button" className="msheet__scrim" aria-label="Close" onClick={close} />
-          <div className="msheet__panel">{coloring ? <ColorSheet close={close} /> : <ScenePanel />}</div>
+          <div className="msheet__panel">{coloring ? <ToolSheet /> : <ScenePanel />}</div>
         </div>
       )}
     </>

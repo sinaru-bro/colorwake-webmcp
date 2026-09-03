@@ -1441,24 +1441,23 @@
   }
 }
 
-.only-phone {
-  display: none;
-}
-
-/* Phone portrait: the canvas owns the screen; choices live behind a floating button. */
+/* Phone portrait: the canvas owns the screen; choices swipe like photos. */
 @media (max-aspect-ratio: 1/1) and (max-width: 600px) {
   .side,
   .strip {
     display: none;
   }
   .main {
-    padding: 10px 10px 84px;
+    padding: 8px 8px 178px;
   }
-  .only-wide {
+  .done {
+    right: 12px;
+    bottom: 186px;
+    width: 60px;
+    height: 60px;
+  }
+  .done__ring {
     display: none;
-  }
-  .only-phone {
-    display: inline;
   }
   .mdock-fab {
     position: fixed;
@@ -1477,8 +1476,10 @@
     box-shadow: var(--shadow);
     cursor: pointer;
   }
-  .mdock-fab--pulse {
-    animation: fab-pulse 1.6s ease-in-out infinite;
+  .mdock-fab:disabled {
+    opacity: 0.4;
+    box-shadow: none;
+    cursor: default;
   }
   .mdock-fab__color {
     width: 14px;
@@ -1488,6 +1489,74 @@
   }
   .mdock-fab__emoji {
     font-size: 24px;
+  }
+  .mbrowse {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+  .mbrowse .mswipe__thumb {
+    width: 180px;
+    height: 180px;
+  }
+  .mbrowse__go {
+    align-self: center;
+    height: 48px;
+    padding: 0 24px;
+    margin-bottom: 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--acc);
+    color: #fff;
+    font: 800 16px var(--display);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .mbrowse__go:active {
+    transform: scale(0.96);
+  }
+  .mbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+  }
+  .mbar .side__sec--works {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .mbar .works {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    height: auto;
+    max-height: none;
+    scrollbar-width: none;
+  }
+  .mbar .works::-webkit-scrollbar {
+    display: none;
+  }
+  .mbar .work {
+    flex: none;
+    width: var(--touch);
+    height: var(--touch);
+  }
+  .mbar .play-dock {
+    position: static;
+    width: 100%;
+    margin: 0;
+    outline: 0;
   }
   .msheet {
     position: fixed;
@@ -1502,31 +1571,32 @@
   }
   .msheet__panel {
     position: absolute;
-    left: 0;
+    top: 0;
     right: 0;
     bottom: 0;
-    max-height: 80dvh;
+    width: min(86vw, 340px);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 14px 14px calc(16px + env(safe-area-inset-bottom));
+    gap: 14px;
+    padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
     background: var(--panel);
-    border-radius: 22px 22px 0 0;
+    border-radius: 22px 0 0 22px;
     box-shadow: var(--shadow);
-    animation: msheet-up 0.24s ease-out;
+    animation: mdrawer-in 0.26s ease-out;
   }
   .msheet__sec {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
   .mswipe {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 14px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding: 6px calc(50% - var(--half, 44px));
+    padding: 8px calc(50% - var(--half, 40px));
     scrollbar-width: none;
   }
   .mswipe::-webkit-scrollbar {
@@ -1539,32 +1609,38 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    min-width: calc(var(--half, 44px) * 2);
-    min-height: 64px;
-    border: 1.5px solid var(--line);
-    border-radius: 14px;
-    background: var(--panel);
-    font: 700 12px var(--display);
-    color: var(--ink);
+    gap: 3px;
+    min-width: calc(var(--half, 40px) * 2);
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: 700 11px var(--display);
+    color: var(--muted);
+    transition:
+      transform 0.2s ease,
+      color 0.2s ease;
   }
   .mswipe__item--on {
-    border-color: var(--acc);
-    background: var(--acc-soft);
+    transform: scale(1.14);
+    color: var(--acc);
   }
   .mswipe__thumb {
-    width: 52px;
-    height: 52px;
+    width: 68px;
+    height: 68px;
   }
   .mswipe__thumb svg {
     width: 100%;
     height: 100%;
   }
   .mswipe__dot {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: 1px solid rgba(0, 0, 0, 0.12);
+  }
+  .mswipe__sizedot {
+    border-radius: 50%;
+    background: var(--ink);
   }
   .msheet__colors {
     display: flex;
@@ -1577,19 +1653,9 @@
   }
 }
 
-@keyframes msheet-up {
+@keyframes mdrawer-in {
   from {
-    transform: translateY(24px);
-    opacity: 0.6;
-  }
-}
-
-@keyframes fab-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
+    transform: translateX(48px);
+    opacity: 0.5;
   }
 }
