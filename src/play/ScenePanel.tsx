@@ -152,10 +152,19 @@ export function ScenePanel() {
 }
 
 export function SceneRail() {
-  const place = useStudio((s) => s.scene.place);
+  const scene = useStudio((s) => s.scene);
+  const icon = (id: string | null) => (id ? SCENE_ICONS[id] : "\u25a2");
   return (
-    <span className="rail__tool rail__tool--emoji" aria-hidden="true">
-      {place ? SCENE_ICONS[place] : "\u25a2"}
-    </span>
+    <>
+      <span className="rail__tool rail__tool--emoji" aria-hidden="true">
+        {icon(scene.place)}
+      </span>
+      <span className="rail__tool rail__tool--emoji" aria-hidden="true">
+        {icon(scene.time)}
+      </span>
+      <span className="rail__tool rail__tool--emoji" aria-hidden="true">
+        {icon(scene.weather)}
+      </span>
+    </>
   );
 }

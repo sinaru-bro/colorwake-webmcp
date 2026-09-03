@@ -1763,6 +1763,7 @@
   .msheet__panel .side__sec--works {
     flex: none;
     align-self: stretch;
+    align-items: stretch;
   }
   .msheet__panel .works {
     flex: none;
