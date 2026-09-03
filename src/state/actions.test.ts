@@ -113,7 +113,7 @@ describe("colorAnother", () => {
 });
 
 describe("auto layout", () => {
-  it("spreads auto-placed characters and leaves manual ones alone", () => {
+  it("keeps the other friends in their slots when one is placed by hand", () => {
     const a = pickAndColor("cat", "head");
     pickAndColor("fish", "body");
     arrangeScene({ placements: [{ characterId: a, position: { x: 0.5, y: 0.5 } }] });
@@ -125,7 +125,7 @@ describe("auto layout", () => {
       position: { x: 0.5, y: 0.5 },
     });
     const autos = chars.filter((c) => c.placement === "auto").map((c) => c.position.x);
-    expect(autos).toEqual([0.35, 0.65]);
+    expect(autos).toEqual([0.5, 0.8]);
   });
 });
 

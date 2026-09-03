@@ -207,6 +207,7 @@ function halt(characterId: string, upright: boolean): boolean {
   const handle = actors.get(characterId);
   clear(entry, handle);
   running.delete(characterId);
+  if (handle) handle.box.style.zIndex = "";
   if (upright && handle) relax(handle);
   return true;
 }
@@ -508,6 +509,7 @@ function finish(
 ): void {
   if (running.get(characterId) !== entry || entry.cancelled) return;
   running.delete(characterId);
+  handle.box.style.zIndex = "";
   if (entry.held.length) held.set(characterId, [...(held.get(characterId) ?? []), ...entry.held]);
   entry.held = [];
   if (settleAt) {
@@ -606,6 +608,7 @@ export function play(req: PlayRequest): PlayResult {
     cancelled: false,
   };
   running.set(req.characterId, entry);
+  handle.box.style.zIndex = action ? "1" : "";
   let lead = 0;
   if (mode === "parallel") {
     const first = compiled.find((c) => c.turn);

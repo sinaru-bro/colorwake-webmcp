@@ -29,15 +29,12 @@ function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-/** Spreads the auto-placed characters that are on the play screen along the ground. */
+/** Seats on-stage friends in fixed ground slots; a hand-placed friend keeps its spot and its slot. */
 function withAutoLayout(characters: Character[], cast: string[]): Character[] {
-  const auto = characters.filter((c) => c.placement === "auto" && cast.includes(c.id));
-  const xs = AUTO_LAYOUT[Math.min(LIMITS.maxOnStage, auto.length)] ?? AUTO_LAYOUT[1];
-  let i = 0;
+  const xs = AUTO_LAYOUT[Math.min(LIMITS.maxOnStage, cast.length)] ?? AUTO_LAYOUT[1];
   return characters.map((c) => {
     if (c.placement !== "auto" || !cast.includes(c.id)) return c;
-    const x = xs[Math.min(i, xs.length - 1)];
-    i += 1;
+    const x = xs[Math.min(cast.indexOf(c.id), xs.length - 1)];
     return { ...c, position: { x, y: GROUND_Y } };
   });
 }
