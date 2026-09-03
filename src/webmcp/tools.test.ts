@@ -207,6 +207,17 @@ describe("apply_motion", () => {
     const steps = Array.from({ length: 9 }, () => ({ primitive: "spin" }));
     expect(call("apply_motion", { character: id, steps })).toMatchObject({ ok: false, code: "bad_input" });
   });
+  it("passes the engine's deferred flag through", () => {
+    const id = colored("cat");
+    setEngine({
+      ...getEngine(),
+      play: () => ({ ok: true, durationMs: 0, skipped: [], fallback: null, deferred: true }),
+    });
+    expect(call("apply_motion", { character: id, motion: "spin" })).toMatchObject({
+      ok: true,
+      deferred: true,
+    });
+  });
 });
 
 describe("arrange_scene", () => {
@@ -235,6 +246,21 @@ describe("arrange_scene", () => {
     const res = call("arrange_scene", { placements: [{ character: id, at: "sky" }] });
     expect(getState().characters[0].position).toEqual({ x: 0.5, y: 0.5 });
     expect(res.ok).toBe(true);
+  });
+  it("rejects more placements than the stage holds", () => {
+    const id = colored("cat");
+    const placements = Array.from({ length: 4 }, () => ({ character: id, at: "left" }));
+    expect(call("arrange_scene", { placements })).toMatchObject({ ok: false, code: "bad_input" });
+  });
+  it("rejects the same friend placed twice", () => {
+    const id = colored("cat");
+    const res = call("arrange_scene", {
+      placements: [
+        { character: id, at: "left" },
+        { character: id, at: "right" },
+      ],
+    });
+    expect(res).toMatchObject({ ok: false, code: "duplicate_character" });
   });
 });
 

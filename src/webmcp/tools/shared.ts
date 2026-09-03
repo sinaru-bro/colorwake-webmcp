@@ -24,25 +24,27 @@ export function defineTool(def: ToolDef): ToolDef {
     ...def,
     execute(input: unknown) {
       const before = getState();
-      let result: unknown;
-      try {
-        result = def.execute(input);
-      } catch {
-        result = fail("internal", `${def.name} failed unexpectedly.`, {
-          hint: "Call get_studio_state and retry.",
+      const report = (result: unknown): unknown => {
+        const note = describeActivity(def.name, input, result, before, getState());
+        ui.noteActivity({
+          tool: def.name,
+          kid: note.kid,
+          tag: note.tag,
+          ok: (result as { ok?: boolean }).ok === true,
+          read: def.readOnly === true,
+          at: Date.now(),
         });
+        if (note.flash.length > 0) ui.flash(note.flash);
+        return result;
+      };
+      const failed = () =>
+        fail("internal", `${def.name} failed unexpectedly.`, { hint: "Call get_studio_state and retry." });
+      try {
+        const result = def.execute(input);
+        return result instanceof Promise ? result.then(report, () => report(failed())) : report(result);
+      } catch {
+        return report(failed());
       }
-      const note = describeActivity(def.name, input, result, before, getState());
-      ui.noteActivity({
-        tool: def.name,
-        kid: note.kid,
-        tag: note.tag,
-        ok: (result as { ok?: boolean }).ok === true,
-        read: def.readOnly === true,
-        at: Date.now(),
-      });
-      if (note.flash.length > 0) ui.flash(note.flash);
-      return result;
     },
   };
 }

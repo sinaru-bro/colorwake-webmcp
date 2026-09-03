@@ -21,7 +21,14 @@ export interface EnginePlayRequest {
 }
 
 export type EnginePlayResult =
-  | { ok: true; durationMs: number; skipped: string[]; fallback: "wiggle" | null }
+  | {
+      ok: true;
+      durationMs: number;
+      skipped: string[];
+      fallback: "wiggle" | null;
+      /** The actor was not mounted yet; the motion starts once it is and durationMs is 0. */
+      deferred?: boolean;
+    }
   | { ok: false; code: string };
 
 export interface EngineCurrent {

@@ -31,7 +31,7 @@ export const setTool = defineTool({
       if (!match) {
         return fail(
           "unknown_color",
-          `"${color}" is not a color I know — use a palette id, a CSS color name or #rrggbb.`,
+          `"${color}" is not a color I know — use a palette id, a common color name or #rrggbb.`,
           {
             options: COLOR_OPTIONS,
           },

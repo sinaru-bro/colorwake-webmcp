@@ -28,7 +28,9 @@ export const SetToolInput = z.strictObject({
   color: z
     .string()
     .optional()
-    .describe('Palette id like "red" or "sky", a CSS color name, or #rrggbb for a color outside the palette'),
+    .describe(
+      'Palette id like "red" or "sky", a common color name, or #rrggbb for a color outside the palette',
+    ),
   size: z.enum(["s", "m", "l"]).optional().describe("Stroke size for pen/brush/pencil"),
 });
 
@@ -93,7 +95,7 @@ export const ArrangeSceneInput = z.strictObject({
   place: z.string().optional().describe("Place id from list_motions, e.g. home, sea, sky (blank = none)"),
   time: z.enum(["day", "night"]).optional(),
   weather: z.string().optional().describe("Weather id from list_motions, e.g. clear, rain, snow, cloudy"),
-  placements: z.array(PlacementInput).max(4).optional(),
+  placements: z.array(PlacementInput).max(3).optional().describe("Up to the three the stage holds"),
 });
 
 export function toInputSchema(schema: z.ZodType): Record<string, unknown> {

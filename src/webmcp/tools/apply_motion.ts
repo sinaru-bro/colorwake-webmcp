@@ -48,6 +48,12 @@ const RETURN_UNITS_PER_MS = 0.5;
 /** Friends currently on a prop, with the size they had before. */
 const onProps = new Map<string, { action: string; place: PlaceId; scale: number }>();
 
+/** Two frames, so a stage that mounted this turn has registered its actors before the motion starts. */
+function stageSettled(): Promise<void> | null {
+  if (typeof requestAnimationFrame !== "function") return null;
+  return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+}
+
 function prepareSteps(steps: Step[], parts: Set<string>, speed: number): PreparedSteps {
   const kept: Step[] = [];
   const skipped: string[] = [];
@@ -146,6 +152,7 @@ function playOnProp(character: Character, action: PlaceAction, speed: number) {
     loop: Boolean(action.pendulum),
     speed,
     durationMs: played.durationMs,
+    ...(played.deferred ? { deferred: true } : {}),
   });
 }
 
@@ -184,114 +191,121 @@ export function runApplyMotion(input: unknown) {
     return ok({ character: summarize(character), stopped: true, switchedTo: switched.switchedTo });
   }
   const broughtOnStage = bringOnStage(character.id);
-  const clamped: Record<string, unknown> = {};
-  let speed = rawSpeed ?? 1;
-  if (speed !== clampNumber(speed, LIMITS.speed.min, LIMITS.speed.max)) {
-    speed = clampNumber(speed, LIMITS.speed.min, LIMITS.speed.max);
-    clamped.speed = speed;
-  }
-  if (motion) {
-    const found = findAction(motion, place);
-    if (found.action && !found.here) {
-      const where = found.places.map((p) => placeById(p)?.label ?? p).join(" or ");
-      return fail("not_here", `${found.action.label} needs the ${where} scene.`, {
-        hint: "Ask the player if they want to go there, then arrange_scene with that place first.",
-        options: found.places,
-      });
+  // A stage that opened this call mounts its actors on the next frames; waiting for them
+  // lets the result report the real run instead of a deferred one with durationMs 0.
+  const settled = switched.switchedTo === "play" || broughtOnStage ? stageSettled() : null;
+  const start = () => {
+    const clamped: Record<string, unknown> = {};
+    let speed = rawSpeed ?? 1;
+    if (speed !== clampNumber(speed, LIMITS.speed.min, LIMITS.speed.max)) {
+      speed = clampNumber(speed, LIMITS.speed.min, LIMITS.speed.max);
+      clamped.speed = speed;
     }
-    if (found.action) {
-      const result = playOnProp(character, found.action, speed);
-      return result.ok
-        ? {
-            ...result,
-            broughtOnStage,
-            switchedTo: switched.switchedTo,
-            clamped: clamped.speed ? clamped : null,
-          }
-        : result;
+    if (motion) {
+      const found = findAction(motion, place);
+      if (found.action && !found.here) {
+        const where = found.places.map((p) => placeById(p)?.label ?? p).join(" or ");
+        return fail("not_here", `${found.action.label} needs the ${where} scene.`, {
+          hint: "Ask the player if they want to go there, then arrange_scene with that place first.",
+          options: found.places,
+        });
+      }
+      if (found.action) {
+        const result = playOnProp(character, found.action, speed);
+        return result.ok
+          ? {
+              ...result,
+              broughtOnStage,
+              switchedTo: switched.switchedTo,
+              clamped: clamped.speed ? clamped : null,
+            }
+          : result;
+      }
     }
-  }
-  let loop: boolean | number | undefined = rawLoop;
-  if (typeof loop === "number" && loop !== clampNumber(loop, 1, LIMITS.loop.max)) {
-    loop = clampNumber(loop, 1, LIMITS.loop.max);
-    clamped.loop = loop;
-  }
-  const parts = new Set(rigById(rig)?.parts.map((p) => p.id) ?? []);
-  let presetId: string | null = null;
-  let source: PresetSource | null = null;
-  let chosen: string | null = null;
-  let pose: Pose | undefined;
-  let sourceSteps: Step[];
-  let playMode: PlayMode = mode ?? "parallel";
-  if (motion) {
-    const found = findPreset(motion, rig);
-    if (!found) {
-      return fail("unknown_motion", `No preset "${motion}".`, {
-        hint: "Or compose it with steps.",
-        options: [...presetsForRig(rig).map((p) => p.id), ...here],
-      });
+    let loop: boolean | number | undefined = rawLoop;
+    if (typeof loop === "number" && loop !== clampNumber(loop, 1, LIMITS.loop.max)) {
+      loop = clampNumber(loop, 1, LIMITS.loop.max);
+      clamped.loop = loop;
     }
-    const key = `${character.id}:${found.preset.id}`;
-    const picked = chooseVariant(found.preset, variant, lastVariant.get(key));
-    if (!picked) {
-      return fail("unknown_variant", `"${found.preset.id}" has no variant "${variant}".`, {
-        options: variantIds(found.preset) ?? [],
-      });
+    const parts = new Set(rigById(rig)?.parts.map((p) => p.id) ?? []);
+    let presetId: string | null = null;
+    let source: PresetSource | null = null;
+    let chosen: string | null = null;
+    let pose: Pose | undefined;
+    let sourceSteps: Step[];
+    let playMode: PlayMode = mode ?? "parallel";
+    if (motion) {
+      const found = findPreset(motion, rig);
+      if (!found) {
+        return fail("unknown_motion", `No preset "${motion}".`, {
+          hint: "Or compose it with steps.",
+          options: [...presetsForRig(rig).map((p) => p.id), ...here],
+        });
+      }
+      const key = `${character.id}:${found.preset.id}`;
+      const picked = chooseVariant(found.preset, variant, lastVariant.get(key));
+      if (!picked) {
+        return fail("unknown_variant", `"${found.preset.id}" has no variant "${variant}".`, {
+          options: variantIds(found.preset) ?? [],
+        });
+      }
+      presetId = found.preset.id;
+      source = found.source;
+      sourceSteps = picked.steps;
+      pose = picked.pose;
+      playMode = mode ?? picked.mode;
+      if (loop === undefined) loop = picked.loop;
+      if (found.preset.variants.length > 1) {
+        chosen = picked.id;
+        lastVariant.set(key, picked.id);
+      }
+    } else {
+      sourceSteps = steps ?? [];
     }
-    presetId = found.preset.id;
-    source = found.source;
-    sourceSteps = picked.steps;
-    pose = picked.pose;
-    playMode = mode ?? picked.mode;
-    if (loop === undefined) loop = picked.loop;
-    if (found.preset.variants.length > 1) {
-      chosen = picked.id;
-      lastVariant.set(key, picked.id);
+    const prepared = prepareSteps(sourceSteps, parts, speed);
+    let fallback: "wiggle" | null = null;
+    if (prepared.steps.length === 0) {
+      const wiggle = findPreset(FALLBACK_PRESET_ID, rig);
+      if (!wiggle) return fail("no_motion", "Nothing in that motion applies to this character.");
+      prepared.steps = wiggle.preset.variants[0].steps;
+      fallback = "wiggle";
+      if (loop === undefined) loop = wiggle.preset.variants[0].loop;
     }
-  } else {
-    sourceSteps = steps ?? [];
-  }
-  const prepared = prepareSteps(sourceSteps, parts, speed);
-  let fallback: "wiggle" | null = null;
-  if (prepared.steps.length === 0) {
-    const wiggle = findPreset(FALLBACK_PRESET_ID, rig);
-    if (!wiggle) return fail("no_motion", "Nothing in that motion applies to this character.");
-    prepared.steps = wiggle.preset.variants[0].steps;
-    fallback = "wiggle";
-    if (loop === undefined) loop = wiggle.preset.variants[0].loop;
-  }
-  leaveProp(character.id);
-  const loopArg: boolean | number | "auto" =
-    rawLoop === undefined && loop === true ? "auto" : (loop ?? false);
-  const played = engine.play({
-    characterId: character.id,
-    preset: presetId,
-    presetSource: source,
-    variant: chosen,
-    steps: prepared.steps,
-    mode: playMode,
-    speed,
-    loop: loopArg,
-    pose: pose ?? null,
-    onSettle: (position) => arrangeScene({ placements: [{ characterId: character.id, position }] }),
-  });
-  if (!played.ok) return fail(played.code, "The motion could not start.");
-  const allClamped = { ...clamped, ...(prepared.clamped ?? {}) };
-  return ok({
-    character: summarize(character),
-    motion: presetId,
-    variant: chosen,
-    source,
-    steps: presetId ? undefined : prepared.steps.length,
-    mode: playMode,
-    loop: loopArg,
-    speed,
-    durationMs: played.durationMs,
-    skipped: [...new Set([...prepared.skipped, ...played.skipped])],
-    fallback: fallback ?? played.fallback,
-    ignored: motion && steps ? ["steps", ...prepared.ignored] : prepared.ignored,
-    clamped: Object.keys(allClamped).length ? allClamped : null,
-    broughtOnStage,
-    switchedTo: switched.switchedTo,
-  });
+    leaveProp(character.id);
+    const loopArg: boolean | number | "auto" =
+      rawLoop === undefined && loop === true ? "auto" : (loop ?? false);
+    const played = engine.play({
+      characterId: character.id,
+      preset: presetId,
+      presetSource: source,
+      variant: chosen,
+      steps: prepared.steps,
+      mode: playMode,
+      speed,
+      loop: loopArg,
+      pose: pose ?? null,
+      onSettle: (position) => arrangeScene({ placements: [{ characterId: character.id, position }] }),
+    });
+    if (!played.ok) return fail(played.code, "The motion could not start.");
+    const allClamped = { ...clamped, ...(prepared.clamped ?? {}) };
+    return ok({
+      character: summarize(character),
+      motion: presetId,
+      variant: chosen,
+      source,
+      steps: presetId ? undefined : prepared.steps.length,
+      mode: playMode,
+      loop: loopArg,
+      speed,
+      durationMs: played.durationMs,
+      ...(played.deferred ? { deferred: true } : {}),
+      skipped: [...new Set([...prepared.skipped, ...played.skipped])],
+      fallback: fallback ?? played.fallback,
+      ignored: motion && steps ? ["steps", ...prepared.ignored] : prepared.ignored,
+      clamped: Object.keys(allClamped).length ? allClamped : null,
+      broughtOnStage,
+      switchedTo: switched.switchedTo,
+    });
+  };
+  return settled ? settled.then(start) : start();
 }

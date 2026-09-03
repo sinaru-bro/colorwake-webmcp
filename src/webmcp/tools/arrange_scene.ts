@@ -36,6 +36,9 @@ export const arrangeScene = defineTool({
     for (const [i, p] of (placements ?? []).entries()) {
       const target = resolveCharacter(p.character);
       if (!target.ok) return target;
+      if (resolvedPlacements.some((r) => r.characterId === target.character.id)) {
+        return fail("duplicate_character", `"${p.character}" is placed twice — one spot per friend.`);
+      }
       const position = typeof p.at === "string" ? { ...ANCHORS[p.at as Anchor] } : { x: p.at.x, y: p.at.y };
       const x = clampNumber(position.x, 0, 1);
       const y = clampNumber(position.y, 0, 1);

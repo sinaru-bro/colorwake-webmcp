@@ -11,11 +11,14 @@ export const applyMotions = defineTool({
   execute(input) {
     const parsed = parseInput(ApplyMotionsInput, input);
     if (!parsed.ok) return parsed;
-    const results = parsed.data.actions.map((action) => runApplyMotion(action));
-    const started = results.filter((r) => (r as { ok: boolean }).ok).length;
-    if (started === 0) {
-      return { ok: false, code: "all_failed", error: "None of the motions could start.", results };
-    }
-    return { ok: true, started, results };
+    const raw = parsed.data.actions.map((action) => runApplyMotion(action));
+    const assemble = (results: unknown[]) => {
+      const started = results.filter((r) => (r as { ok: boolean }).ok).length;
+      if (started === 0) {
+        return { ok: false, code: "all_failed", error: "None of the motions could start.", results };
+      }
+      return { ok: true, started, results };
+    };
+    return raw.some((r) => r instanceof Promise) ? Promise.all(raw).then(assemble) : assemble(raw);
   },
 });
