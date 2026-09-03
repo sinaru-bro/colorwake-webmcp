@@ -835,6 +835,14 @@
   display: none;
 }
 
+.strip > :first-child {
+  margin-left: auto;
+}
+
+.strip > :last-child {
+  margin-right: auto;
+}
+
 .strip__group {
   display: flex;
   flex-direction: column;
@@ -1367,11 +1375,14 @@
     flex-direction: column;
   }
   .main {
+    min-height: 0;
     padding: 12px 12px 96px;
   }
   .side,
   .side--play {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    max-height: 46%;
+    overflow-y: auto;
     width: 100%;
     border-left: 0;
     border-top: 1px solid var(--line);

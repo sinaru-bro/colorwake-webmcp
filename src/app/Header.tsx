@@ -11,7 +11,11 @@ function AgentBadge() {
     ? { cls: " badge--warn", text: "Not saving", detail: "Storage is full — new changes may be lost" }
     : agent.support === "native"
       ? { cls: "", text: "WebMCP ready", detail: `${TOOL_NAMES.length} site tools` }
-      : { cls: " badge--none", text: "WebMCP off", detail: "Needs ChatGPT desktop or Chrome 149+" };
+      : {
+          cls: " badge--none",
+          text: "WebMCP built-in",
+          detail: "This device can't connect yet — use ChatGPT desktop or Chrome 149+",
+        };
   return (
     <button
       type="button"
