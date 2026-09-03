@@ -2,9 +2,17 @@
 
 Color a picture, then say what it should do.
 
-colorwake is a coloring studio for parents and kids to create together. Color a sketch with a finger, mouse or pencil; press ✓ and the same canvas becomes a play screen where the characters come alive. An AI agent (ChatGPT desktop in-app browser or Chrome 149+) joins through [WebMCP](https://github.com/webmachinelearning/webmcp) — it hands out brushes and colors, moves the characters, and sets the place, time and weather. It never paints.
+colorwake is a coloring studio for parents and kids to create together. Color a sketch with a finger, mouse or stylus; finish it and the same canvas becomes a stage where the characters come alive. An AI agent (via the ChatGPT desktop app's in-app browser, or any WebMCP-capable browser) joins through [WebMCP](https://github.com/webmachinelearning/webmcp) — tell it the story and it casts the characters, sets the place, time and weather, and composes their motions. No artwork is generated for the child: the child makes the art, and the agent plays inside it.
 
 Built for the WebMCP Challenge.
+
+## Design notes
+
+- **`get_guide` — an in-page playbook.** A read-only tool can carry guidance, not just app state: how the studio works, what the child can do next, and the house rules. An agent that reads it starts with a clear role — offer choices, never take over the story.
+- **A loop built around the protocol.** On-screen taps aren't announced to the agent; successful write-tool results return fresh, action-relevant context, and `get_studio_state` resyncs the rest.
+- **Parity, with one boundary.** UI-equivalent tools call the same actions as the on-screen controls, and there is deliberately no painting tool — coloring belongs to the child. The 20-picture and 8-step caps return actionable errors; the three-spot stage swaps out the friend that has been there longest.
+- **Local-first.** No app backend or accounts. Raw artwork stays in localStorage; the agent receives only a compact state summary.
+- **Co-play by design.** ChatGPT is for users 13 and older, so a parent operates the agent and relays the child's ideas while the child stays in charge of the art.
 
 ## Run
 
@@ -13,7 +21,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL in Chrome 149+ with `chrome://flags/#enable-webmcp-testing` enabled, or in the ChatGPT desktop app's in-app browser.
+Open the local URL in the ChatGPT desktop app's in-app browser, or in any browser with WebMCP support.
 
 ## Deploy
 
