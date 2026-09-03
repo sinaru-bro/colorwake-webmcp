@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "../render/icons";
+import { HelperNote } from "./HelperNote";
 import { ui, useUi } from "../state/ui";
 
 const PORTRAIT = "(max-aspect-ratio: 1/1)";
@@ -69,6 +70,7 @@ export function Sidebar({ label, rail, className, children }: Props) {
           {rail}
         </button>
       )}
+      {open && <HelperNote />}
     </aside>
   );
 }
