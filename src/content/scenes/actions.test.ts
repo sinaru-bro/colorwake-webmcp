@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bandToStage } from "../../play/scene/geometry";
+import { bandToStage, stageToBand } from "../../play/scene/geometry";
 import { clampParams } from "../motions/clamp";
 import { partClass } from "../motions/primitives";
 import { PLACES } from "./places";
@@ -50,5 +50,12 @@ describe("bandToStage", () => {
   it("falls back to a width-spanning drawing without a stage", () => {
     expect(bandToStage({ x: 1600, y: 936 }, null)).toEqual({ x: 1, y: 0.78 });
     expect(bandToStage({ x: 0, y: 0 }, null).y).toBeCloseTo(0);
+  });
+  it("inverts through stageToBand, with and without a stage", () => {
+    for (const stage of [{ w: 1180, h: 654 }, null]) {
+      const there = bandToStage(stageToBand({ x: 0.62, y: 0.9 }, stage), stage);
+      expect(there.x).toBeCloseTo(0.62);
+      expect(there.y).toBeCloseTo(0.9);
+    }
   });
 });

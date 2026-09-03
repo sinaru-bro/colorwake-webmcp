@@ -12,10 +12,18 @@ import { rigById } from "../../content/rigs";
 import { HORIZON, placeById } from "../../content/scenes";
 import { actionsAt, findAction, type PlaceAction } from "../../content/scenes/actions";
 import { sketchById } from "../../content/sketches/catalog";
-import { bandToStage } from "../../play/scene/geometry";
+import { bandToStage, stageToBand, type StageSize } from "../../play/scene/geometry";
 import { arrangeScene, bringOnStage } from "../../state/actions";
 import { getState } from "../../state/store";
-import { LIMITS, type Character, type PlaceId, type PlayMode, type Pose, type Step } from "../../state/types";
+import {
+  LIMITS,
+  type Character,
+  type PlaceId,
+  type PlayMode,
+  type Pose,
+  type Position,
+  type Step,
+} from "../../state/types";
 import { summarize } from "../describe";
 import { getEngine, type PresetSource } from "../engineBridge";
 import { fail, ok } from "../results";
@@ -33,6 +41,10 @@ interface PreparedSteps {
 const lastVariant = new Map<string, string>();
 /** After a path ends the friend grows back once its new spot has painted. */
 const SETTLE_GROW_MS = 60;
+/** A beat on landing before a returnHome walk starts. */
+const RETURN_PAUSE_MS = 240;
+/** Drawing units per millisecond of the walk back home. */
+const RETURN_UNITS_PER_MS = 0.5;
 /** Friends currently on a prop, with the size they had before. */
 const onProps = new Map<string, { action: string; place: PlaceId; scale: number }>();
 
@@ -84,8 +96,29 @@ export function leaveProps(keepPlace: PlaceId | null, movedIds: string[] = []): 
   }
 }
 
+/** Extends a returnHome path so the friend ends up back where it stood. */
+function withReturnHome(action: PlaceAction, home: Position, stage: StageSize | null): PlaceAction {
+  const path = action.path;
+  if (!action.returnHome || !path || path.length === 0) return action;
+  const end = path[path.length - 1];
+  const back = stageToBand(home, stage);
+  const dist = Math.hypot(back.x - end.x, back.y - end.y);
+  if (dist < 40) return action;
+  const durationMs = Math.min(2200, Math.max(320, Math.round(dist / RETURN_UNITS_PER_MS)));
+  return {
+    ...action,
+    path: [
+      ...path,
+      { x: end.x, y: end.y, durationMs: RETURN_PAUSE_MS },
+      { x: back.x, y: back.y, durationMs, ease: "ease-in-out" },
+    ],
+  };
+}
+
 function playOnProp(character: Character, action: PlaceAction, speed: number) {
   const engine = getEngine();
+  const cur = getState().characters.find((x) => x.id === character.id) ?? character;
+  const home = { x: cur.position.x, y: Math.max(cur.position.y, HORIZON) };
   const prev = onProps.get(character.id)?.scale ?? character.scale;
   onProps.delete(character.id);
   const position = bandToStage(action.at, engine.stageSize());
@@ -99,7 +132,7 @@ function playOnProp(character: Character, action: PlaceAction, speed: number) {
     mode: "parallel",
     speed,
     loop: Boolean(action.pendulum),
-    action,
+    action: withReturnHome(action, home, engine.stageSize()),
     onSettle: (pos) => {
       arrangeScene({ placements: [{ characterId: character.id, position: pos }] });
       setTimeout(() => leaveProp(character.id), SETTLE_GROW_MS);

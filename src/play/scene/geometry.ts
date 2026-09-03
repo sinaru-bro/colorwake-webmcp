@@ -39,3 +39,12 @@ export function bandToStage(pt: { x: number; y: number }, stage: StageSize | nul
   const left = (stage.w - W * s) / 2;
   return { x: (left + pt.x * s) / stage.w, y: (stage.h * HORIZON - (ABOVE - pt.y) * s) / stage.h };
 }
+
+/** A stage position in the place drawing's units (feet); the inverse of bandToStage. */
+export function stageToBand(pos: Position, stage: StageSize | null): { x: number; y: number } {
+  if (!stage || !stage.w || !stage.h)
+    return { x: pos.x * W, y: ABOVE - ((HORIZON - pos.y) / HORIZON) * ABOVE };
+  const s = bandScale(stage);
+  const left = (stage.w - W * s) / 2;
+  return { x: (pos.x * stage.w - left) / s, y: ABOVE - (stage.h * (HORIZON - pos.y)) / s };
+}

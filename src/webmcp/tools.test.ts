@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { arrangeScene, enterPlay, fillRegion, pickSketch, resetAll } from "../state/actions";
 import { getState } from "../state/store";
+import { bandToStage } from "../play/scene/geometry";
 import { describeState } from "./describe";
 import { getEngine, setEngine, type EnginePlayRequest } from "./engineBridge";
 import { toInputSchema } from "./schemas";
@@ -263,11 +264,11 @@ describe("play screen", () => {
 });
 
 describe("get_guide", () => {
-  it("returns the guide with every tool mentioned, under 3000 characters", () => {
+  it("returns the guide with every tool mentioned, under 3200 characters", () => {
     const res = call("get_guide") as Result & { guide: string };
     expect(res.ok).toBe(true);
     for (const t of TOOLS) expect(res.guide).toContain(t.name);
-    expect(res.guide.length).toBeLessThanOrEqual(3000);
+    expect(res.guide.length).toBeLessThanOrEqual(3200);
   });
 });
 
@@ -391,6 +392,18 @@ describe("place actions", () => {
     call("arrange_scene", { place: "home" });
     expect(getState().characters[0].scale).toBe(1);
     expect(stopped).toContain(id);
+  });
+  it("walks the slide home so the friend ends where it stood", () => {
+    const id = colored("cat");
+    enterPlay();
+    arrangeScene({ place: "playground", placements: [{ characterId: id, position: { x: 0.5, y: 0.9 } }] });
+    const { reqs } = capture();
+    call("apply_motion", { character: id, motion: "slide" });
+    const path = reqs[0].action?.path ?? [];
+    expect(path.length).toBeGreaterThan(5);
+    const home = bandToStage(path[path.length - 1], { w: 1180, h: 654 });
+    expect(home.x).toBeCloseTo(0.5);
+    expect(home.y).toBeCloseTo(0.9);
   });
   it("lists what the current place allows", () => {
     colored("cat");

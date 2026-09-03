@@ -30,6 +30,8 @@ export interface PlaceAction {
   scale?: number;
   /** A one-off path from `at`; the friend stays where it ends. */
   path?: Waypoint[];
+  /** After the path, walk back to the spot the friend stood on before. */
+  returnHome?: boolean;
   /** A back-and-forth swing about a point `pivotAbove` units above the feet, kept in step with a drawn prop. */
   pendulum?: { angle: number; pivotAbove: number; periodMs: number; sync?: string };
   /** Limb moves played alongside; parts a body lacks are skipped. */
@@ -99,6 +101,7 @@ export const PLACE_ACTIONS: PlaceAction[] = [
       { x: 1540, y: 926, durationMs: 380, ease: "ease-out", lean: -8 },
       { x: 1580, y: 936, durationMs: 260, ease: "ease-out" },
     ],
+    returnHome: true,
     parts: legs(20, 400),
   },
   inside("school", { x: 1487, y: 936 }, ["ride the bus", "get on the bus", "school bus"], 2600, {
